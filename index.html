@@ -22,8 +22,9 @@
         /* ГРА */
         .history-section { padding: 8px 5px; background: #000; border-bottom: 1px solid #1a1a1a; }
         .history-list { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; }
-        .hs-item { background: #111; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #777; border: 1px solid #222; }
-        .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border-color: var(--blue); min-width: 50px; text-align: center; }
+        .hs-item { background: #111; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #777; border: 1px solid #222; min-width: 45px; text-align: center; }
+        .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border-color: var(--blue); min-width: 50px; }
+        
         .back-btn { margin: 10px 15px; background: #111; border: 1px solid #333; color: #888; padding: 8px 12px; border-radius: 8px; font-size: 11px; width: fit-content; cursor: pointer; }
         .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         #rocket-v { width: 240px; mix-blend-mode: screen; transform: scale(0); transition: opacity 0.3s; pointer-events: none; }
@@ -57,7 +58,11 @@
     </div>
 
     <div id="rocket-screen" class="screen">
-        <div class="history-section"><div class="history-list" id="hs-list"><div id="live-tab" class="hs-item active-tab">0.0s</div></div></div>
+        <div class="history-section">
+            <div class="history-list" id="hs-list">
+                <div id="live-tab" class="hs-item active-tab">0.0s</div>
+                </div>
+        </div>
         <button class="back-btn" onclick="openGame('lobby-screen')">← ВИЙТИ</button>
         <div class="game-viewport"><video id="rocket-v" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4"></video></div>
         <div class="controls">
@@ -72,10 +77,8 @@
         let myBet = 0;
         let lastRoundId = -1;
 
-        const CYCLE_MS = 20000; // Весь цикл 20 сек
-        const WAIT_MS = 6000;  // 6 сек очікування
-        const FLY_MAX_MS = 11000; // Макс політ 11 сек
-        // Решта (3 сек) - це чистий CRASH/пауза
+        const CYCLE_MS = 20000; 
+        const WAIT_MS = 6000;  
 
         function updateBal() {
             document.getElementById('bal-val').innerText = balance.toFixed(2);
@@ -85,6 +88,32 @@
         function openGame(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            if(id === 'rocket-screen') fillHistory(); // Заповнюємо історію при вході
+        }
+
+        // Функція розрахунку ікса для будь-якого раунду (синхронно)
+        function getCrashForRound(rId) {
+            return 1.1 + ((rId * 157) % 40) / 10;
+        }
+
+        // Заповнення історії минулими результатами
+        function fillHistory() {
+            const list = document.getElementById('hs-list');
+            const now = Date.now();
+            const currentRoundId = Math.floor(now / CYCLE_MS);
+            
+            // Видаляємо стару історію крім live-таба
+            while (list.children.length > 1) { list.removeChild(list.lastChild); }
+
+            // Додаємо 10 минулих раундів
+            for (let i = 1; i <= 10; i++) {
+                let rId = currentRoundId - i;
+                let val = getCrashForRound(rId);
+                let item = document.createElement('div');
+                item.className = "hs-item";
+                item.innerText = val.toFixed(2) + "x";
+                list.appendChild(item);
+            }
         }
 
         function mainEngine() {
@@ -96,41 +125,36 @@
             const rocket = document.getElementById('rocket-v');
             const btn = document.getElementById('action-btn');
 
-            // 1. ПЕРЕВІРКА НОВОГО РАУНДУ
+            // Оновлення при зміні раунду
             if (roundId !== lastRoundId) {
+                if(lastRoundId !== -1) fillHistory(); // Оновлюємо список, коли раунд закінчився
                 lastRoundId = roundId;
                 document.getElementById('my-bet-container').innerHTML = "";
                 if(myBet > 0) { myBet = 0; btn.style.background = "var(--blue)"; btn.innerText = "СТАВКА"; }
             }
 
-            // 2. ВИЗНАЧЕННЯ ТОЧКИ КРАШУ (для всіх однакова в цьому раунді)
-            const crashX = 1.1 + ((roundId * 157) % 40) / 10; // Напр. від 1.1 до 5.1
-            const crashMs = (crashX - 1) / 0.15 * 1000; // Час польоту до крашу
+            const crashX = getCrashForRound(roundId);
+            const crashMs = (crashX - 1) / 0.15 * 1000;
 
             if (msIntoCycle < WAIT_MS) {
-                // ФАЗА ОЧІКУВАННЯ
                 tab.style.color = "var(--blue)";
                 tab.innerText = ((WAIT_MS - msIntoCycle) / 1000).toFixed(1) + "s";
                 rocket.style.transform = "scale(0)";
                 rocket.pause();
-                if(myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; btn.style.color = "white"; }
+                if(myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; }
             } 
             else if (msIntoCycle < WAIT_MS + crashMs) {
-                // ФАЗА ПОЛЬОТУ
                 const flyTime = (msIntoCycle - WAIT_MS) / 1000;
                 const currentX = (1 + flyTime * 0.15).toFixed(2);
-                
                 tab.style.color = "var(--green)";
                 tab.innerText = currentX + "x";
                 rocket.style.transform = "scale(1)";
                 rocket.style.opacity = "1";
                 if (rocket.paused) rocket.play();
-
                 const liveStatus = document.getElementById('live-bet-status');
                 if(liveStatus && myBet > 0) liveStatus.innerText = currentX + "x";
             } 
             else {
-                // ФАЗА КРАШУ
                 tab.style.color = "var(--red)";
                 tab.innerText = crashX.toFixed(2) + "x";
                 rocket.style.opacity = "0";
@@ -159,10 +183,7 @@
             else if (msIntoCycle >= WAIT_MS && myBet > 0) {
                 const flyTime = (msIntoCycle - WAIT_MS) / 1000;
                 const currentX = 1 + flyTime * 0.15;
-                
-                // Перевірка чи не крашнулось вже
-                const roundId = Math.floor(now / CYCLE_MS);
-                const crashX = 1.1 + ((roundId * 157) % 40) / 10;
+                const crashX = getCrashForRound(Math.floor(now / CYCLE_MS));
 
                 if (currentX < crashX) {
                     let win = myBet * currentX;
