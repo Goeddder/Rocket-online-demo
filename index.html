@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Online 🚀</title>
+    <title>Giftup Pro 🚀</title>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; position: relative; z-index: 100; }
+        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; z-index: 100; position: relative; }
         .balance { background: var(--green); color: black; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
         .screen { display: none; height: calc(100vh - 50px); flex-direction: column; overflow: hidden; }
         .screen.active { display: flex; }
 
-        /* ГОЛОВНЕ ЛОБІ */
-        #lobby-screen { background: #000; padding: 20px; box-sizing: border-box; }
-        .lobby-title { font-size: 24px; font-weight: 900; margin-bottom: 20px; letter-spacing: 1px; }
-        .game-card { background: var(--card); border-radius: 25px; padding: 30px; border: 1px solid #333; text-align: center; cursor: pointer; transition: 0.2s; }
-        .game-card:active { transform: scale(0.95); }
-        .game-card-icon { font-size: 60px; display: block; margin-bottom: 10px; }
-        .game-card h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
+        /* ПРОФІЛЬ ТА ЛОББІ */
+        .profile-card { background: var(--card); border-radius: 20px; padding: 15px; margin: 20px; border: 1px solid #333; display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .user-meta { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 16px; }
+        .user-id { font-size: 11px; color: #666; }
 
-        /* ГРА РАКЕТА */
+        .game-card { background: var(--card); border-radius: 25px; padding: 25px; border: 1px solid #333; text-align: center; cursor: pointer; margin: 0 20px; transition: 0.2s; }
+        .game-card:active { transform: scale(0.96); }
+
+        /* ВЕРХНЯ ІСТОРІЯ */
         .history-section { padding: 10px 5px; background: #080808; border-bottom: 1px solid #1a1a1a; }
         .history-list { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; }
-        .history-list::-webkit-scrollbar { display: none; }
-        .hs-item { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #777; border: 1px solid #333; white-space: nowrap; flex-shrink: 0; }
+        .hs-item { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #777; border: 1px solid #333; white-space: nowrap; }
         .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); min-width: 60px; text-align: center; }
 
-        .game-viewport { flex-grow: 1; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #rocket-v { 
-            width: 220px; 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%) scale(0); 
-            transition: transform 0.5s ease-out, opacity 0.3s;
-        }
+        /* ЦЕНТР */
+        .game-viewport { flex-grow: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #rocket-v { width: 220px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); transition: transform 0.5s ease-out, opacity 0.3s; }
 
+        /* КЕРУВАННЯ */
         .controls { padding: 15px; background: #0a0a0a; border-top: 1px solid #222; }
         input { width: 100%; background: #000; border: 1px solid #333; padding: 14px; color: white; border-radius: 12px; font-size: 18px; outline: none; text-align: center; margin-bottom: 10px; box-sizing: border-box; }
         .main-btn { width: 100%; padding: 18px; border-radius: 14px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
+        /* НИЖНІЙ ТАБ СТАВОК */
         .bets-menu { height: 160px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; }
-        .bets-title { padding: 8px 15px; font-size: 11px; color: #555; font-weight: bold; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
-        .bets-scroll { flex-grow: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
-        .bet-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; align-items: center; }
-        .win-tag { color: var(--green); font-weight: 900; background: rgba(52, 199, 89, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .bets-title { padding: 8px 15px; font-size: 10px; color: #555; font-weight: bold; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .bets-scroll { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
+        .bet-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .status-wait { color: var(--blue); font-weight: bold; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .back-btn { position: absolute; top: 70px; left: 15px; z-index: 10; background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; }
+        .back-btn { position: absolute; top: 70px; left: 15px; z-index: 10; background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -60,28 +60,27 @@
     </div>
 
     <div id="lobby-screen" class="screen active">
-        <div class="lobby-title">ІГРИ</div>
-        <div class="game-card" onclick="openGame('rocket-screen')">
-            <span class="game-card-icon">🚀</span>
-            <h2>ROCKET</h2>
-            <p style="color: var(--blue); font-size: 12px; margin-top: 5px;">ONLINE • MULTIPLAYER</p>
+        <div class="profile-card">
+            <div class="avatar">👤</div>
+            <div class="user-meta">
+                <span class="user-name">@tg_player</span>
+                <span class="user-id">ID: 7720194 • ПРЕМІУМ</span>
+            </div>
         </div>
-        
-        <div class="game-card" style="margin-top:15px; opacity:0.3; cursor:default;">
-            <span class="game-card-icon">💎</span>
-            <h2>MINES</h2>
-            <p style="color: #666; font-size: 12px; margin-top: 5px;">COMING SOON</p>
+
+        <div class="game-card" onclick="openGame('rocket-screen')">
+            <span style="font-size: 50px;">🚀</span>
+            <h2 style="margin: 10px 0;">ROCKET ONLINE</h2>
+            <button class="main-btn" style="background: var(--blue); padding: 10px;">ГРАТИ</button>
         </div>
     </div>
 
     <div id="rocket-screen" class="screen">
-        <button class="back-btn" onclick="openGame('lobby-screen')">← ЛОББІ</button>
+        <button class="back-btn" onclick="openGame('lobby-screen')">← ВИЙТИ</button>
         
         <div class="history-section">
             <div class="history-list" id="hs-list">
                 <div id="live-tab" class="hs-item active-tab">5.0s</div>
-                <div class="hs-item">1.25x</div>
-                <div class="hs-item">3.10x</div>
             </div>
         </div>
 
@@ -97,7 +96,7 @@
         </div>
 
         <div class="bets-menu">
-            <div class="bets-title"><span>МОЇ СТАВКИ</span><span>РЕЗУЛЬТАТ</span></div>
+            <div class="bets-title"><span>ПОТОЧНА СТАВКА</span><span>СТАТУС</span></div>
             <div class="bets-scroll" id="my-bets-list"></div>
         </div>
     </div>
@@ -105,7 +104,7 @@
     <script>
         let balance = 500.00;
         let myBet = 0;
-        let activeBetAmt = 0;
+        let activeAmt = 0;
         let mode = "WAIT"; 
         let currentMult = 1.00;
         let timer = 5.0;
@@ -113,9 +112,6 @@
         function openGame(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'rocket-screen') {
-                document.getElementById('rocket-v').load();
-            }
         }
 
         function updateBal() {
@@ -127,10 +123,13 @@
             timer = 5.0;
             myBet = 0;
             
+            // Очищення таба ставок після вибуху для нового раунду
+            document.getElementById('my-bets-list').innerHTML = "";
+
             const tab = document.getElementById('live-tab');
             tab.className = "hs-item active-tab";
-            tab.innerText = "5.0s";
             tab.style.color = "var(--blue)";
+            tab.innerText = "5.0s";
             
             const v = document.getElementById('rocket-v');
             v.pause(); v.currentTime = 0;
@@ -139,7 +138,6 @@
 
             document.getElementById('action-btn').innerText = "СТАВКА";
             document.getElementById('action-btn').style.background = "var(--blue)";
-            document.getElementById('action-btn').style.color = "white";
 
             let t = setInterval(() => {
                 timer -= 0.1;
@@ -157,15 +155,20 @@
             const tab = document.getElementById('live-tab');
             tab.style.color = "var(--green)";
             
-            const v = document.getElementById('rocket-v');
-            v.play();
-            v.style.transform = "translate(-50%, -50%) scale(1.1)";
+            document.getElementById('rocket-v').play();
+            document.getElementById('rocket-v').style.transform = "translate(-50%, -50%) scale(1.1)";
 
-            let crashPoint = (1.1 + Math.random() * 2.5).toFixed(2);
+            let crashPoint = (1.1 + Math.random() * 2.8).toFixed(2);
 
             let fly = setInterval(() => {
                 currentMult += 0.01;
                 tab.innerText = currentMult.toFixed(2) + "x";
+
+                // Оновлення статусу ставки в реальному часі
+                if(myBet > 0) {
+                    const row = document.querySelector('.bet-row');
+                    if(row) row.querySelector('.status-col').innerText = currentMult.toFixed(2) + "x";
+                }
                 
                 if(currentMult >= crashPoint) {
                     clearInterval(fly);
@@ -182,9 +185,13 @@
             document.getElementById('rocket-v').style.opacity = "0";
 
             if(myBet > 0) {
-                document.getElementById('action-btn').innerText = "CRASH";
+                const row = document.querySelector('.bet-row');
+                if(row) {
+                    row.querySelector('.status-col').innerText = "ПРОГРАШ";
+                    row.querySelector('.status-col').style.color = "var(--red)";
+                }
+                document.getElementById('action-btn').innerText = "КРАШ";
                 document.getElementById('action-btn').style.background = "var(--red)";
-                logToBottom(activeBetAmt, "LOSS", cp);
             }
 
             const hsList = document.getElementById('hs-list');
@@ -202,32 +209,36 @@
 
             if(mode === "WAIT" && myBet === 0) {
                 if(amt > balance || amt <= 0) return;
-                balance -= amt; myBet = amt; activeBetAmt = amt;
+                balance -= amt; myBet = amt; activeAmt = amt;
                 updateBal();
-                btn.innerText = "ПРИЙНЯТО";
+                
+                // ЗРАЗУ ДОДАЄМО В ТАБ
+                const list = document.getElementById('my-bets-list');
+                list.innerHTML = `
+                    <div class="bet-row">
+                        <span>💰 ${amt} ₴</span>
+                        <span class="status-col status-wait">ОЧІКУВАННЯ...</span>
+                    </div>
+                `;
+
+                btn.innerText = "У ГРІ";
                 btn.style.background = "#333";
             } else if(mode === "FLY" && myBet > 0) {
                 let win = myBet * currentMult;
                 balance += win;
-                logToBottom(myBet, "WIN", currentMult.toFixed(2), win.toFixed(0));
-                myBet = 0;
                 updateBal();
+
+                // ОНОВЛЮЄМО НА ВИГРАШ
+                const row = document.querySelector('.bet-row');
+                if(row) {
+                    row.innerHTML = `<span>💰 ${myBet} ₴</span><span style="color:var(--green); font-weight:900;">+${win.toFixed(0)} ₴ (${currentMult.toFixed(2)}x)</span>`;
+                }
+
+                myBet = 0;
                 btn.innerText = "WIN: " + win.toFixed(0);
                 btn.style.background = "var(--green)";
                 btn.style.color = "black";
             }
-        }
-
-        function logToBottom(bet, res, x, win) {
-            const list = document.getElementById('my-bets-list');
-            const row = document.createElement('div');
-            row.className = "bet-row";
-            if(res === "WIN") {
-                row.innerHTML = `<span>💰 ${bet} ₴</span><span class="win-tag">${x}x (+${win} ₴)</span>`;
-            } else {
-                row.innerHTML = `<span>💰 ${bet} ₴</span><span style="color:var(--red); font-weight:bold;">${x}x (L)</span>`;
-            }
-            list.prepend(row);
         }
 
         window.onload = startCycle;
