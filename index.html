@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Online 🚀</title>
+    <title>Giftup Pro 🚀</title>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; }
@@ -14,42 +14,46 @@
         .screen { display: none; height: 100vh; overflow-y: auto; padding: 15px; box-sizing: border-box; }
         .screen.active { display: block; }
 
-        /* ГОЛОВНЕ ЛОБІ */
+        /* ЛОБІ */
         .user-info { background: var(--card); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 25px; border: 1px solid #333; }
         .avatar { width: 45px; height: 45px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        
         .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .game-card { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.2s; position: relative; }
-        .game-card:active { transform: scale(0.95); }
+        .game-card { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid #333; cursor: pointer; text-align: center; }
         .game-img { height: 100px; background: #252527; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .game-name { padding: 12px; text-align: center; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .game-name { padding: 12px; font-weight: bold; font-size: 13px; }
 
-        /* ГРА РАКЕТА */
+        /* ГРА */
         .back-btn { background: #222; border: none; color: #aaa; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
-        .history { display: flex; gap: 8px; padding-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
-        .hs-item { background: #1a1a1a; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #888; border: 1px solid #333; }
         
-        .viewport { height: 240px; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #222; }
+        /* ТАБ ІКСІВ ТА ТАЙМЕРА */
+        .history { display: flex; gap: 8px; padding-bottom: 15px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+        .hs-item { background: #1a1a1a; padding: 6px 14px; border-radius: 10px; font-size: 14px; font-weight: bold; color: #888; border: 1px solid #333; white-space: nowrap; transition: 0.3s; }
         
-        /* Стиль для відео: додано примусове відображення */
-        #rocket-v { 
-            width: 180px; 
-            position: absolute; 
-            bottom: -200px; 
-            transition: transform 0.5s ease-out, opacity 0.3s; 
-            z-index: 2; 
-            pointer-events: none;
+        /* Активна плашка (для таймера та іксів) */
+        .active-tab { 
+            background: rgba(0, 122, 255, 0.15); 
+            color: var(--blue); 
+            border: 1px solid var(--blue); 
+            min-width: 70px; 
+            text-align: center;
+        }
+        .active-tab.flying { 
+            color: var(--green); 
+            border-color: var(--green); 
+            background: rgba(52, 199, 89, 0.15); 
+        }
+        .active-tab.crashed { 
+            color: var(--red); 
+            border-color: var(--red); 
+            background: rgba(255, 59, 48, 0.15); 
         }
 
-        .mult { font-size: 55px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(0,0,0,0.9); position: relative; }
+        .viewport { height: 280px; background: #000; border-radius: 25px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #222; }
+        #rocket-v { width: 200px; position: absolute; bottom: -220px; transition: transform 0.6s ease-out, opacity 0.3s; z-index: 2; }
 
-        .controls { background: var(--card); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
-        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .main-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; transition: 0.2s; }
-        .main-btn:active { transform: scale(0.98); }
-
-        .lobby-list { margin-top: 15px; height: 100px; overflow-y: auto; }
-        .bet-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; font-size: 13px; color: #666; }
+        .controls { background: var(--card); padding: 25px; border-radius: 28px 28px 0 0; margin-top: 20px; border: 1px solid #333; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 18px; color: white; border-radius: 15px; font-size: 20px; margin-bottom: 15px; box-sizing: border-box; outline: none; text-align: center; }
+        .main-btn { width: 100%; padding: 22px; border-radius: 18px; border: none; font-size: 20px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -64,48 +68,39 @@
             <div class="avatar">👤</div>
             <div>
                 <div style="font-weight: bold;">@tg_player</div>
-                <div style="font-size: 11px; color: var(--blue);">ID: 55012 • VIP PLAYER</div>
+                <div style="font-size: 11px; color: var(--blue);">ID: 55012 • VIP</div>
             </div>
         </div>
-
-        <h3 style="margin-bottom: 15px;">Всі ігри</h3>
         <div class="game-grid">
             <div class="game-card" onclick="go('rocket-game')">
                 <div class="game-img">🚀</div>
-                <div class="game-name">Rocket Online</div>
+                <div class="game-name">ROCKET</div>
             </div>
-            <div class="game-card" style="opacity: 0.5;">
+            <div class="game-card" style="opacity: 0.4;">
                 <div class="game-img">💎</div>
-                <div class="game-name">Mines (Скоро)</div>
+                <div class="game-name">MINES</div>
             </div>
         </div>
     </div>
 
     <div id="rocket-game" class="screen">
-        <button class="back-btn" onclick="go('lobby')">← До вибору ігор</button>
+        <button class="back-btn" onclick="go('lobby')">← Вийти</button>
         
         <div class="history" id="hs-list">
-            <div class="hs-item">1.25x</div>
-            <div class="hs-item" style="color:#cc42ff">12.40x</div>
+            <div id="live-tab" class="hs-item active-tab">5.0s</div>
+            <div class="hs-item">1.54x</div>
+            <div class="hs-item">2.10x</div>
         </div>
 
         <div class="viewport">
-            <div id="status" style="position:absolute; top:15px; font-size:11px; color:var(--blue); font-weight:bold; z-index:11; letter-spacing:1px;">ЧЕКАЄМО СТАВКИ</div>
-            <div id="mult" class="mult">5.0s</div>
-            
             <video id="rocket-v" playsinline muted loop preload="auto">
                 <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
             </video>
         </div>
 
         <div class="controls">
-            <input type="number" id="bet-amt" value="100" min="10">
+            <input type="number" id="bet-amt" value="100">
             <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
-            
-            <div class="lobby-list">
-                <div class="bet-row"><span>👤 @vlad_pro</span><span>200 ₴</span></div>
-                <div class="bet-row"><span>👤 @anna_win</span><span>50 ₴</span></div>
-            </div>
         </div>
     </div>
 
@@ -119,7 +114,6 @@
         function go(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            // Примусово завантажуємо відео при вході в гру
             if(id === 'rocket-game') document.getElementById('rocket-v').load();
         }
 
@@ -132,24 +126,20 @@
             timer = 5.0;
             myBet = 0;
             
-            document.getElementById('status').innerText = "ПРИЙОМ СТАВОК";
-            document.getElementById('status').style.color = "var(--blue)";
-            document.getElementById('mult').innerText = "5.0s";
-            document.getElementById('mult').style.color = "white";
+            const tab = document.getElementById('live-tab');
+            tab.className = "hs-item active-tab"; 
+            tab.innerText = "5.0s";
             
             const v = document.getElementById('rocket-v');
-            v.pause();
-            v.currentTime = 0;
-            v.style.transform = "translateY(200px)"; // Ховаємо вниз
-            v.style.opacity = "1";
+            v.pause(); v.currentTime = 0;
+            v.style.transform = "translateY(220px)"; v.style.opacity = "1";
 
             document.getElementById('action-btn').innerText = "СТАВКА";
             document.getElementById('action-btn').style.background = "var(--blue)";
-            document.getElementById('action-btn').style.color = "white";
 
             let t = setInterval(() => {
                 timer -= 0.1;
-                document.getElementById('mult').innerText = Math.max(0, timer).toFixed(1) + "s";
+                tab.innerText = Math.max(0, timer).toFixed(1) + "s";
                 if(timer <= 0) {
                     clearInterval(t);
                     launch();
@@ -160,18 +150,19 @@
         function launch() {
             mode = "FLY";
             currentMult = 1.00;
-            document.getElementById('status').innerText = "РАКЕТА ЛЕТИТЬ";
-            document.getElementById('status').style.color = "var(--green)";
+            const tab = document.getElementById('live-tab');
+            tab.classList.add('flying');
+            tab.innerText = "1.00x";
             
             const v = document.getElementById('rocket-v');
-            v.play().catch(e => console.log("Video play failed:", e));
-            v.style.transform = "translateY(-150px)"; // Виліт вгору
+            v.play();
+            v.style.transform = "translateY(-180px)";
 
             let crashPoint = (1.1 + Math.random() * 2.5 + (Math.random() > 0.8 ? 5 : 0)).toFixed(2);
 
             let fly = setInterval(() => {
                 currentMult += 0.01;
-                document.getElementById('mult').innerText = currentMult.toFixed(2) + "x";
+                tab.innerText = currentMult.toFixed(2) + "x";
                 
                 if(currentMult >= crashPoint) {
                     clearInterval(fly);
@@ -182,25 +173,23 @@
 
         function boom(cp) {
             mode = "CRASH";
-            document.getElementById('status').innerText = "ВИБУХ!";
-            document.getElementById('status').style.color = "var(--red)";
-            document.getElementById('mult').innerText = cp + "x";
-            document.getElementById('mult').style.color = "var(--red)";
+            const tab = document.getElementById('live-tab');
+            tab.className = "hs-item active-tab crashed";
+            tab.innerText = cp + "x";
             
-            const v = document.getElementById('rocket-v');
-            v.style.opacity = "0"; // Плавне зникнення при вибуху
+            document.getElementById('rocket-v').style.opacity = "0";
 
             if(myBet > 0) {
                 document.getElementById('action-btn').innerText = "ПРОГРАШ";
                 document.getElementById('action-btn').style.background = "var(--red)";
             }
 
-            const hs = document.getElementById('hs-list');
+            // Додаємо результат в історію після плашки
+            const hsList = document.getElementById('hs-list');
             const item = document.createElement('div');
             item.className = "hs-item";
-            if(cp > 5) item.style.color = "#cc42ff";
             item.innerText = cp + "x";
-            hs.prepend(item);
+            hsList.insertBefore(item, hsList.children[1]);
 
             setTimeout(startCycle, 3000);
         }
@@ -210,22 +199,21 @@
             const amt = parseFloat(document.getElementById('bet-amt').value);
 
             if(mode === "WAIT" && myBet === 0) {
-                if(amt > balance || amt < 10) return;
+                if(amt > balance) return;
                 balance -= amt; myBet = amt;
                 updateBal();
-                btn.innerText = "ОЧІКУВАННЯ...";
+                btn.innerText = "ПРИЙНЯТО";
                 btn.style.background = "#333";
             } else if(mode === "FLY" && myBet > 0) {
                 let win = myBet * currentMult;
                 balance += win; myBet = 0;
                 updateBal();
-                btn.innerText = "ЗАБРАНО: " + win.toFixed(2);
+                btn.innerText = "WIN: " + win.toFixed(2);
                 btn.style.background = "var(--green)";
-                btn.style.color = "black";
+                btn.style.color = "#000";
             }
         }
 
-        // Запуск при завантаженні
         window.onload = startCycle;
     </script>
 </body>
