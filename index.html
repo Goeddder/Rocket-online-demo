@@ -6,89 +6,86 @@
     <title>Giftup Pro 🚀</title>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
         
         /* HEADER */
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; }
-        .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
+        .balance { background: var(--green); color: black; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
-        .screen { display: none; height: 100vh; display: flex; flex-direction: column; }
-        .screen.active { display: flex; }
-
-        /* ТАБ ІКСІВ (ГОРЗОНТАЛЬНИЙ СКРОЛ) */
-        .history-container { padding: 10px 15px; background: #080808; border-bottom: 1px solid #1a1a1a; }
-        .history { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-        .history::-webkit-scrollbar { display: none; }
-        .hs-item { background: #1a1a1a; padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: bold; color: #888; border: 1px solid #333; white-space: nowrap; flex-shrink: 0; }
+        /* ТАБ ІКСІВ (ЗВЕРХУ) */
+        .history-section { padding: 10px 5px; background: #080808; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; }
+        .history-list { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; }
+        .history-list::-webkit-scrollbar { display: none; }
+        .hs-item { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #777; border: 1px solid #333; white-space: nowrap; flex-shrink: 0; }
         
         .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); min-width: 60px; text-align: center; }
-        .my-win-tab { background: var(--green) !important; color: black !important; border: none !important; font-weight: 900; }
+        .my-win-tab { background: var(--green) !important; color: black !important; border: none !important; }
 
-        /* ВІЗУАЛ РАКЕТИ */
-        .viewport { height: 240px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid #222; }
+        /* ІГРОВЕ ПОЛЕ (РАКЕТА ПОСЕРЕДИНІ) */
+        .game-viewport { flex-grow: 1; min-height: 200px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #rocket-v { 
             width: 200px; 
             position: absolute; 
             top: 50%; 
             left: 50%; 
             transform: translate(-50%, -50%) scale(0); 
-            transition: transform 0.5s ease-out, opacity 0.3s;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
         }
 
-        /* КЕРУВАННЯ */
-        .controls { padding: 15px; background: var(--card); }
-        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 10px; box-sizing: border-box; outline: none; text-align: center; }
-        .main-btn { width: 100%; padding: 18px; border-radius: 14px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
+        /* ПАНЕЛЬ КЕРУВАННЯ */
+        .controls { padding: 15px; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        input { flex: 1; background: #000; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; outline: none; text-align: center; }
+        .main-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
-        /* ТАБ СТАВОК (ВЕРТИКАЛЬНИЙ СКРОЛ) */
-        .bets-lobby { flex-grow: 1; background: #0a0a0a; overflow-y: auto; padding: 0 15px; border-top: 1px solid #222; -webkit-overflow-scrolling: touch; }
-        .bets-header { display: flex; justify-content: space-between; padding: 12px 0; font-size: 11px; color: #444; font-weight: bold; position: sticky; top: 0; background: #0a0a0a; z-index: 5; }
-        .bet-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #111; font-size: 13px; }
-        .user-col { display: flex; align-items: center; gap: 8px; color: #aaa; }
-        .amt-col { color: #eee; font-weight: 600; }
-        .win-col { color: var(--green); font-weight: bold; }
-
-        .back-btn { background: #222; border: none; color: #888; padding: 8px 15px; margin: 10px; border-radius: 8px; font-size: 12px; }
+        /* МЕНЮШКА СТАВОК (ЗНИЗУ) */
+        .bets-menu { height: 200px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+        .bets-title { padding: 10px 15px; font-size: 11px; color: #555; font-weight: bold; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .bets-scroll { flex-grow: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
+        .bets-scroll::-webkit-scrollbar { display: none; }
+        .bet-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
+        .u-info { color: #888; display: flex; align-items: center; gap: 6px; }
+        .u-cash { color: #eee; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-weight: 900;">GIFTUP</div>
+        <div style="font-weight: 900; font-size: 18px;">GIFTUP</div>
         <div class="balance"><span id="bal-val">500.00</span> ₴</div>
     </div>
 
-    <div id="rocket-game" class="screen active">
-        
-        <div class="history-container">
-            <div class="history" id="hs-list">
-                <div id="live-tab" class="hs-item active-tab">5.0s</div>
-                <div class="hs-item">2.41x</div>
-                <div class="hs-item">1.05x</div>
-                <div class="hs-item">5.50x</div>
-                <div class="hs-item">1.20x</div>
-            </div>
+    <div class="history-section">
+        <div class="history-list" id="hs-list">
+            <div id="live-tab" class="hs-item active-tab">5.0s</div>
+            <div class="hs-item">1.45x</div>
+            <div class="hs-item">2.10x</div>
+            <div class="hs-item">1.10x</div>
+            <div class="hs-item">8.40x</div>
+            <div class="hs-item">1.02x</div>
         </div>
+    </div>
 
-        <div class="viewport">
-            <video id="rocket-v" playsinline muted loop>
-                <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
-            </video>
-        </div>
+    <div class="game-viewport">
+        <video id="rocket-v" playsinline muted loop>
+            <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
+        </video>
+    </div>
 
-        <div class="controls">
+    <div class="controls">
+        <div class="input-row">
             <input type="number" id="bet-amt" value="100">
-            <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
         </div>
+        <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
+    </div>
 
-        <div class="bets-lobby">
-            <div class="bets-header">
-                <span>ГРАВЕЦЬ</span>
-                <span>СТАВКА / ВИГРАШ</span>
-            </div>
-            <div id="bets-list">
-                </div>
+    <div class="bets-menu">
+        <div class="bets-title">
+            <span>LIVE СТАВКИ</span>
+            <span>СУМА</span>
         </div>
+        <div class="bets-scroll" id="bets-list">
+            </div>
     </div>
 
     <script>
@@ -98,7 +95,7 @@
         let currentMult = 1.00;
         let timer = 5.0;
 
-        const fakeUsers = ["@dark_lord", "@lucky_girl", "@crypto_king", "@vlad_2024", "@winner_top", "@pro_player", "@rich_man"];
+        const names = ["@alex", "@marta", "@vova", "@king", "@wolf", "@user1", "@lucky", "@denis", "@anna"];
 
         function updateBal() {
             document.getElementById('bal-val').innerText = balance.toFixed(2);
@@ -113,14 +110,17 @@
             tab.className = "hs-item active-tab";
             tab.innerText = "5.0s";
             
-            document.getElementById('rocket-v').style.transform = "translate(-50%, -50%) scale(0)";
-            document.getElementById('rocket-v').style.opacity = "1";
+            const v = document.getElementById('rocket-v');
+            v.pause(); v.currentTime = 0;
+            v.style.transform = "translate(-50%, -50%) scale(0)";
+            v.style.opacity = "1";
 
             document.getElementById('action-btn').innerText = "СТАВКА";
             document.getElementById('action-btn').style.background = "var(--blue)";
+            document.getElementById('action-btn').style.color = "white";
 
-            // Очистити лобі ставок для нового раунду
-            generateFakeBets();
+            // Оновлюємо список ставок
+            refreshBets();
 
             let t = setInterval(() => {
                 timer -= 0.1;
@@ -139,10 +139,11 @@
             tab.style.color = "var(--green)";
             tab.style.borderColor = "var(--green)";
             
-            document.getElementById('rocket-v').play();
-            document.getElementById('rocket-v').style.transform = "translate(-50%, -50%) scale(1.1)";
+            const v = document.getElementById('rocket-v');
+            v.play();
+            v.style.transform = "translate(-50%, -50%) scale(1.1)";
 
-            let crashPoint = (1.1 + Math.random() * 2.5 + (Math.random() > 0.8 ? 6 : 0)).toFixed(2);
+            let crashPoint = (1.05 + Math.random() * 2 + (Math.random() > 0.8 ? 5 : 0)).toFixed(2);
 
             let fly = setInterval(() => {
                 currentMult += 0.01;
@@ -186,12 +187,12 @@
                 let win = myBet * currentMult;
                 balance += win;
                 
-                // Твоя ставка перша в табі іксів
+                // Твій виграш летить у верхній таб іксів
                 addToHistory(`${currentMult.toFixed(2)}x (+${win.toFixed(0)}₴)`, true);
                 
                 myBet = 0;
                 updateBal();
-                btn.innerText = "ЗАБРАНО: " + win.toFixed(0) + "₴";
+                btn.innerText = "WIN: " + win.toFixed(0) + "₴";
                 btn.style.background = "var(--green)";
                 btn.style.color = "black";
             }
@@ -203,19 +204,19 @@
             item.className = isMyWin ? "hs-item my-win-tab" : "hs-item";
             item.innerText = text;
             hsList.insertBefore(item, hsList.children[1]);
-            hsList.scrollLeft = 0; // Скролимо на початок, щоб бачити нове
+            hsList.scrollLeft = 0;
         }
 
-        function generateFakeBets() {
+        function refreshBets() {
             const list = document.getElementById('bets-list');
             list.innerHTML = "";
-            for(let i=0; i<15; i++) {
-                const user = fakeUsers[Math.floor(Math.random()*fakeUsers.length)];
-                const amt = Math.floor(Math.random()*900) + 10;
+            for(let i=0; i<20; i++) {
+                const u = names[Math.floor(Math.random()*names.length)];
+                const a = Math.floor(Math.random()*1500) + 20;
                 list.innerHTML += `
                     <div class="bet-row">
-                        <div class="user-col">👤 ${user}</div>
-                        <div class="amt-col">${amt} ₴</div>
+                        <div class="u-info">👤 ${u}</div>
+                        <div class="u-cash">${a} ₴</div>
                     </div>
                 `;
             }
