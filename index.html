@@ -2,86 +2,74 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GiftUp demo by @IllyaGarant 🚀</title>
+    <title>Giftup Final Solo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --card: #141416; }
-        body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
+        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow: hidden; }
         
-        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; height: 50px; position: relative; z-index: 100; box-sizing: border-box; }
-        .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
+        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; }
+        .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
 
-        .screen { display: none; height: calc(100vh - 50px); flex-direction: column; position: relative; z-index: 5; }
-        .screen.active { display: flex; }
+        .screen { display: none; height: calc(100vh - 50px); flex-direction: column; }
+        .active { display: flex; }
 
-        /* ЛОББІ */
-        .profile-card { background: var(--card); border-radius: 12px; padding: 15px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; margin: 20px; }
-        .avatar-img { width: 45px; height: 45px; border-radius: 50%; background: #222; object-fit: cover; }
-        .game-card { background: var(--card); border-radius: 16px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; }
-        
-        /* ГРА */
-        .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
-        #rocket-v { width: 260px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; position: relative; z-index: 5; }
+        /* ІСТОРІЯ ІКСІВ (ЗВЕРХУ) */
+        .history { padding: 8px 10px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; }
+        .hs-item { background: #111; padding: 5px 12px; border-radius: 6px; font-size: 12px; border: 1px solid #222; min-width: 45px; text-align: center; }
 
-        /* ІСТОРІЯ ІКСІВ (ГОРТАЄТЬСЯ) */
-        .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-        .history-section::-webkit-scrollbar { display: none; }
-        .hs-item { background: #000; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #555; min-width: 45px; text-align: center; }
-        .active-tab { border-color: var(--blue); color: var(--blue); }
-        .past-item { color: #888; border-color: #222; }
+        /* ЗОНА РАКЕТИ - ЧИСТИЙ ЧОРНИЙ */
+        .viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
+        #rocket { width: 260px; mix-blend-mode: screen; transform: scale(0); transition: 0.3s; }
 
-        .back-btn { margin: 10px 15px; background: transparent; border: 1px solid #222; color: #555; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-
-        .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; }
-        input { width: 100%; background: #000; border: 1px solid #222; padding: 12px; color: white; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
-        .main-btn { width: 100%; padding: 18px; border-radius: 10px; border: none; font-size: 17px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
+        /* КЕРУВАННЯ */
+        .controls { padding: 15px; border-top: 1px solid #1a1a1a; }
+        input { width: 100%; background: #111; border: 1px solid #222; padding: 12px; color: #fff; border-radius: 10px; text-align: center; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 18px; border-radius: 12px; border: none; font-size: 17px; font-weight: bold; color: #fff; cursor: pointer; }
 
         /* СПИСОК СТАВОК (ГОРТАЄТЬСЯ) */
-        .bets-menu { height: 100px; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; scrollbar-width: none; }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; animation: slideUp 0.2s ease; }
-        @keyframes slideUp { from { transform: translateY(5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .user-info { display: flex; align-items: center; gap: 8px; }
-        .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #222; }
+        .bets-list { height: 120px; overflow-y: auto; padding: 10px 15px; border-top: 1px solid #1a1a1a; }
+        .bet-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; }
+        .u-info { display: flex; align-items: center; gap: 8px; }
+        .u-img { width: 26px; height: 26px; border-radius: 50%; background: #222; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <div style="font-weight: 900;">GIFTUP</div>
+        <div style="font-weight: bold;">GIFTUP</div>
         <div class="balance"><span id="bal-val">500.00</span> ₴</div>
     </div>
 
-    <div id="lobby-screen" class="screen active">
-        <div class="profile-card">
-            <img id="user-photo" src="" class="avatar-img" alt="👤" onerror="this.src='https://ui-avatars.com/api/?name=User&background=222&color=fff'">
-            <div>
-                <div id="user-name" style="font-weight: bold; font-size: 15px;">Завантаження...</div>
-                <div id="user-id" style="font-size: 10px; color: #444;">ID: 00000000</div>
+    <div id="lobby" class="screen active">
+        <div style="padding: 20px;">
+            <div style="background:#111; padding:15px; border-radius:12px; border:1px solid #222; display:flex; align-items:center; gap:10px;">
+                <img id="u-p" src="" class="u-img" style="width:40px; height:40px;">
+                <div id="u-n">Гравець</div>
             </div>
-        </div>
-        <div class="game-card" onclick="openGame()">
-            <div style="font-size: 45px; margin-bottom: 10px;">🚀</div>
-            <h3 style="margin:0">ROCKET ONLINE</h3>
-            <div style="color:var(--green); font-size:11px; margin-top:5px;">• LIVE</div>
+            <div onclick="toGame()" style="background:#111; margin-top:20px; padding:30px; border-radius:15px; text-align:center; border:1px solid #222;">
+                <div style="font-size:40px;">🚀</div>
+                <h3>ГРАТИ</h3>
+            </div>
         </div>
     </div>
 
-    <div id="rocket-screen" class="screen">
-        <div class="history-section" id="hs-container">
-            <div id="live-tab" class="hs-item active-tab">0.0s</div>
+    <div id="game" class="screen">
+        <div class="history" id="hs-box">
+            <div id="live-x" class="hs-item" style="color:var(--blue); border-color:var(--blue);">0.0s</div>
         </div>
-        <button class="back-btn" onclick="closeGame()">← ВИЙТИ</button>
-        <div class="game-viewport">
-            <video id="rocket-v" playsinline muted loop>
+        <div class="viewport">
+            <video id="rocket" playsinline muted loop>
                 <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
             </video>
         </div>
         <div class="controls">
-            <input type="number" id="bet-amt" value="100">
-            <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
+            <input type="number" id="bet-in" value="100">
+            <button id="btn-act" class="btn" style="background:var(--blue);" onclick="handleAction()">СТАВКА</button>
         </div>
-        <div class="bets-menu" id="bet-list">
+        <div class="bets-list" id="my-bets-container">
             </div>
     </div>
 
@@ -89,138 +77,125 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "000", photo_url: "" };
-        const uName = user.username ? "@" + user.username : user.first_name;
-        const uPhoto = user.photo_url || `https://ui-avatars.com/api/?name=${uName}&background=222&color=fff`;
+        const user = tg.initDataUnsafe?.user || { first_name: "User", id: "0" };
+        const name = user.username ? "@" + user.username : user.first_name;
+        const photo = user.photo_url || `https://ui-avatars.com/api/?name=${name}&background=222&color=fff`;
 
-        document.getElementById('user-name').innerText = uName;
-        document.getElementById('user-id').innerText = `ID: ${user.id}`;
-        document.getElementById('user-photo').src = uPhoto;
+        document.getElementById('u-n').innerText = name;
+        document.getElementById('u-p').src = photo;
 
-        let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500.00;
-        let myBet = 0;
-        let hasWon = false;
-        let lastRoundId = -1;
-        let history = JSON.parse(localStorage.getItem('rocket_history')) || [];
+        let bal = parseFloat(localStorage.getItem('gift_bal')) || 500.00;
+        let bet = 0;
+        let won = false;
+        let lastId = -1;
+        let hist = JSON.parse(localStorage.getItem('gift_hist')) || [];
 
-        function updateBal() {
-            document.getElementById('bal-val').innerText = balance.toFixed(2);
-            localStorage.setItem('giftup_bal', balance);
+        function save() {
+            document.getElementById('bal-val').innerText = bal.toFixed(2);
+            localStorage.setItem('gift_bal', bal);
         }
 
-        function openGame() {
-            document.getElementById('lobby-screen').classList.remove('active');
-            document.getElementById('rocket-screen').classList.add('active');
-            renderHistory();
+        function toGame() {
+            document.getElementById('lobby').classList.remove('active');
+            document.getElementById('game').classList.add('active');
+            drawHist();
         }
 
-        function closeGame() {
-            document.getElementById('rocket-screen').classList.remove('active');
-            document.getElementById('lobby-screen').classList.add('active');
-        }
-
-        function getCrash(rId) { return 1.1 + ((rId * 157) % 40) / 10; }
-
-        function renderHistory() {
-            const container = document.getElementById('hs-container');
-            while (container.children.length > 1) container.removeChild(container.lastChild);
-            history.forEach(val => {
-                const item = document.createElement('div');
-                item.className = 'hs-item past-item';
-                item.innerText = val.toFixed(2) + 'x';
-                container.appendChild(item);
+        function drawHist() {
+            const box = document.getElementById('hs-box');
+            while (box.children.length > 1) box.removeChild(box.lastChild);
+            hist.forEach(v => {
+                const d = document.createElement('div');
+                d.className = 'hs-item';
+                d.style.color = '#888';
+                d.innerText = v.toFixed(2) + 'x';
+                box.appendChild(d);
             });
         }
 
-        function doAction() {
+        function handleAction() {
             const ms = Date.now() % 20000;
-            const btn = document.getElementById('action-btn');
-            const amt = parseFloat(document.getElementById('bet-amt').value);
+            const amt = parseFloat(document.getElementById('bet-in').value);
+            const btn = document.getElementById('btn-act');
 
-            if (ms < 6000 && myBet === 0) {
-                if (amt > balance || amt <= 0) return;
-                balance -= amt; myBet = amt; hasWon = false;
-                updateBal();
+            if (ms < 6000 && bet === 0) {
+                if (amt > bal || amt <= 0) return;
+                bal -= amt; bet = amt; won = false; save();
                 
-                // Твоя ставка завжди перша
-                const betList = document.getElementById('bet-list');
-                betList.innerHTML = `
-                    <div class="bet-row">
-                        <div class="user-info">
-                            <img src="${uPhoto}" class="mini-avatar">
-                            <span style="color:var(--blue)">${uName}</span>
-                        </div>
-                        <span id="live-x" style="font-weight:bold;">${amt} ₴</span>
+                // СТАВКА ЗАВЖДИ ВГОРУ
+                const container = document.getElementById('my-bets-container');
+                container.innerHTML = `
+                    <div class="bet-item">
+                        <div class="u-info"><img src="${photo}" class="u-img"><span>${name}</span></div>
+                        <span id="cur-bet-x" style="font-weight:bold;">${amt} ₴</span>
                     </div>`;
-                    
-                btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#111";
+                
+                btn.innerText = "ПРИЙНЯТО";
+                btn.style.background = "#222";
             } 
-            else if (ms >= 6000 && myBet > 0 && !hasWon) {
-                const curX = 1 + ((ms - 6000) / 1000) * 0.15;
-                if (curX < getCrash(Math.floor(Date.now() / 20000))) {
-                    let win = myBet * curX;
-                    balance += win; hasWon = true; myBet = 0;
-                    updateBal();
-                    btn.innerText = `+${win.toFixed(0)} ₴`; btn.style.background = "var(--green)";
-                    btn.style.color = "#000";
-                    const liveX = document.getElementById('live-x');
-                    if(liveX) liveX.innerHTML = `<span style="color:var(--green)">+${win.toFixed(0)} ₴</span>`;
+            else if (ms >= 6000 && bet > 0 && !won) {
+                const x = 1 + ((ms - 6000) / 1000) * 0.15;
+                const crash = 1.1 + ((Math.floor(Date.now() / 20000) * 157) % 40) / 10;
+                
+                if (x < crash) {
+                    let win = bet * x;
+                    bal += win; won = true; bet = 0; save();
+                    btn.innerText = `+${win.toFixed(0)} ₴`;
+                    btn.style.background = "var(--green)"; btn.style.color = "#000";
+                    document.getElementById('cur-bet-x').innerHTML = `<span style="color:var(--green)">+${win.toFixed(0)} ₴</span>`;
                 }
             }
         }
 
-        function main() {
+        function loop() {
             const now = Date.now();
             const ms = now % 20000;
             const rId = Math.floor(now / 20000);
-            const tab = document.getElementById('live-tab');
-            const rocket = document.getElementById('rocket-v');
-            const btn = document.getElementById('action-btn');
+            const btn = document.getElementById('btn-act');
+            const rocket = document.getElementById('rocket');
+            const live = document.getElementById('live-x');
 
-            if (rId !== lastRoundId) {
-                if (lastRoundId !== -1) {
-                    history.unshift(getCrash(lastRoundId));
-                    if (history.length > 15) history.pop();
-                    localStorage.setItem('rocket_history', JSON.stringify(history));
-                    renderHistory();
+            if (rId !== lastId) {
+                if (lastId !== -1) {
+                    const c = 1.1 + ((lastId * 157) % 40) / 10;
+                    hist.unshift(c); if (hist.length > 15) hist.pop();
+                    localStorage.setItem('gift_hist', JSON.stringify(hist));
+                    drawHist();
                 }
-                lastRoundId = rId;
-                if (!hasWon) myBet = 0;
-                document.getElementById('bet-list').innerHTML = ""; // Очистка на новий раунд
+                lastId = rId;
+                if (!won) bet = 0;
+                document.getElementById('my-bets-container').innerHTML = ""; 
             }
 
-            const cX = getCrash(rId);
-            const cMs = (cX - 1) / 0.15 * 1000;
+            const crashX = 1.1 + ((rId * 157) % 40) / 10;
+            const crashMs = (crashX - 1) / 0.15 * 1000;
 
             if (ms < 6000) {
-                tab.innerText = ((6000 - ms) / 1000).toFixed(1) + "s";
-                tab.style.color = "var(--blue)";
+                live.innerText = ((6000 - ms) / 1000).toFixed(1) + "s";
+                live.style.color = "var(--blue)";
                 rocket.style.transform = "scale(0)"; rocket.pause();
-                if(myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; btn.style.color="white"; }
-            } else if (ms < 6000 + cMs) {
+                if (bet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; btn.style.color="#fff"; }
+            } else if (ms < 6000 + crashMs) {
                 const curX = (1 + ((ms - 6000) / 1000) * 0.15).toFixed(2);
-                tab.innerText = curX + "x"; tab.style.color = "var(--green)";
+                live.innerText = curX + "x"; live.style.color = "var(--green)";
                 rocket.style.transform = "scale(1)"; rocket.play();
-                if(myBet > 0 && !hasWon) {
-                    btn.innerText = "ЗАБРАТИ " + (myBet * curX).toFixed(0);
+                if (bet > 0 && !won) {
+                    btn.innerText = "ЗАБРАТИ " + (bet * curX).toFixed(0);
                     btn.style.background = "var(--green)"; btn.style.color = "#000";
-                    const liveX = document.getElementById('live-x');
-                    if(liveX) liveX.innerText = curX + "x";
+                    if (document.getElementById('cur-bet-x')) document.getElementById('cur-bet-x').innerText = curX + "x";
                 }
             } else {
-                tab.innerText = cX.toFixed(2) + "x"; tab.style.color = "var(--red)";
+                live.innerText = crashX.toFixed(2) + "x"; live.style.color = "var(--red)";
                 rocket.style.transform = "scale(0)";
-                if(myBet > 0 && !hasWon) { 
-                    btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; btn.style.color="white";
-                    const liveX = document.getElementById('live-x');
-                    if(liveX) liveX.innerHTML = `<span style="color:var(--red)">CRASH</span>`;
-                    myBet = 0; 
+                if (bet > 0 && !won) {
+                    btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; btn.style.color="#fff";
+                    bet = 0;
                 }
             }
         }
 
-        setInterval(main, 50);
-        updateBal();
+        setInterval(loop, 50);
+        save();
     </script>
 </body>
 </html>
