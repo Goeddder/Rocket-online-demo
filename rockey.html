@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Giftup Online Hub</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --panel: #1c1c1e; }
+        
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; overflow-x: hidden; overflow-y: auto; }
+        
+        .screen { display: none; flex-direction: column; min-height: 100vh; }
+        .screen.active { display: flex; }
+        
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; position: sticky; top: 0; z-index: 100; }
+        .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+
+        /* ROCKET VIEWPORT */
+        .viewport { height: 350px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+        #rocket-box { position: absolute; width: 220px; bottom: -300px; left: 50%; margin-left: -110px; transition: transform 0.8s; z-index: 2; }
+        
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            20% { transform: translate(-3px, 0px); }
+            40% { transform: translate(3px, 2px); }
+            60% { transform: translate(-3px, 1px); }
+            100% { transform: translate(0px, 0px); }
+        }
+
+        .game-ui { padding: 15px; background: #111; border-top: 1px solid #222; }
+        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .tab { background: #1c1c1e; border: 1px solid #333; border-radius: 12px; padding: 12px; text-align: center; }
+        .tab-val { font-size: 20px; font-weight: 800; }
+
+        input { width: 100%; background: #1c1c1e; border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; margin-bottom: 10px; font-size: 18px; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; transition: 0.2s; }
+
+        /* MINES GRID */
+        .mines-grid { 
+            display: grid; 
+            grid-template-columns: repeat(5, 60px); 
+            grid-template-rows: repeat(4, 60px);
+            gap: 10px; padding: 20px; justify-content: center; background: #000;
+        }
+        .cell { 
+            width: 60px; height: 60px;
+            background: #1c1c1e; border: 2px solid #333; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer;
+        }
+        .cell.gem { border-color: var(--green); background: rgba(52, 199, 89, 0.1); }
+        .cell.bomb { border-color: var(--red); background: rgba(255, 59, 48, 0.1); }
+        
+        .history { padding: 10px 15px; background: #000; min-height: 200px; }
+        .bet-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #111; font-size: 15px; }
+        .status-online { color: var(--green); font-size: 10px; text-align: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-menu" class="screen active">
+        <div class="header"><span>@tg_player</span><div class="balance"><span class="bal-txt">0.00</span> ₴</div></div>
+        <div style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div onclick="changeScreen('screen-rocket')" style="background:var(--panel); padding:40px 10px; border-radius:20px; text-align:center; border:1px solid #333; cursor:pointer;">🚀<br><b>ROCKET</b></div>
+            <div onclick="changeScreen('screen-mines')" style="background:var(--panel); padding:40px 10px; border-radius:20px; text-align:center; border:1px solid #333; cursor:pointer;">💣<br><b>MINES</b></div>
+        </div>
+    </div>
+
+    <div id="screen-rocket" class="screen">
+        <div class="header"><button onclick="location.reload()" style="background:none; border:none; color:white; cursor:pointer;">← МЕНЮ</button><div class="balance"><span class="bal-txt">0.00</span> ₴</div></div>
+        <div id="rocket-v" class="viewport">
+            <div id="rocket-box"><video id="rocket-vid" playsinline muted loop style="width:100%"><source src="https://files.catbox.moe/d13y9l.mp4"></video></div>
+        </div>
+        <div class="game-ui">
+            <div class="tabs">
+                <div class="tab"><div id="r-mult" class="tab-val">5.00s</div></div>
+                <div class="tab"><div id="r-bet-view" class="tab-val">0.00 ₴</div></div>
+            </div>
+            <input type="number" id="r-input" value="100">
+            <button id="r-btn" class="btn" style="background:var(--blue)" onclick="rocketBet()">СТАВКА</button>
+        </div>
+        <div class="history">
+            <div style="color: #555; font-size: 11px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                <span>ГРАВЕЦЬ</span><span>МНОЖНИК</span><span>ВИГРАШ</span>
+            </div>
+            <div id="r-history"></div>
+        </div>
+    </div>
+
+    <div id="screen-mines" class="screen">
+        <div class="header"><button onclick="location.reload()" style="background:none; border:none; color:white; cursor:pointer;">← МЕНЮ</button><div class="balance"><span class="bal-txt">0.00</span> ₴</div></div>
+        <div style="text-align:center; padding:10px;"><h3 id="m-status">MINER (5 БОМБ)</h3></div>
+        <div class="mines-grid" id="m-board"></div>
+        <div class="game-ui">
+            <div class="tabs">
+                <div class="tab"><div id="m-mult" class="tab-val">1.00x</div></div>
+                <div class="tab"><div id="m-win" class="tab-val">0.00 ₴</div></div>
+            </div>
+            <input type="number" id="m-input" value="100">
+            <button id="m-btn" class="btn" style="background:var(--blue)" onclick="minesStart()">ПОЧАТИ ГРУ</button>
+        </div>
+    </div>
+
+    <script>
+        // Ініціалізація Socket.io (заміни адресу на свою після деплою сервера)
+        // const socket = io('https://твій-сервер.onrender.com'); 
+
+        let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500;
+        const save = () => { 
+            localStorage.setItem('giftup_bal', balance); 
+            document.querySelectorAll('.bal-txt').forEach(e => e.innerText = balance.toFixed(2)); 
+        };
+        save();
+
+        function changeScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+            if(id==='screen-mines') initMines();
+        }
+
+        // --- ROCKET ---
+        let rs="WAIT", rt=5, rm=1, rb=0, rc=2;
+
+        function resetR() {
+            rs="WAIT"; rt=5; rm=1; rb=0;
+            document.getElementById('rocket-box').style.transform="translateY(0)";
+            document.getElementById('rocket-box').style.opacity="1";
+            document.getElementById('r-btn').innerText="СТАВКА";
+            document.getElementById('r-btn').style.background="var(--blue)";
+            document.getElementById('rocket-v').style.background="transparent";
+        }
+
+        function rocketBet() {
+            let v = parseFloat(document.getElementById('r-input').value);
+            if(rs==="WAIT" && rb===0 && v<=balance) {
+                balance-=v; rb=v; save();
+                document.getElementById('r-bet-view').innerText = rb.toFixed(2)+" ₴";
+                // Додаємо в таблицю миттєво
+                const row = `<div id="my-active-row" class="bet-item"><span>@tg_player</span><span id="my-res">у грі...</span><span>${rb} ₴</span></div>`;
+                document.getElementById('r-history').insertAdjacentHTML('afterbegin', row);
+                document.getElementById('r-btn').innerText="ОЧІКУВАННЯ"; document.getElementById('r-btn').style.background="#222";
+                
+                // Якщо є сервер: socket.emit('placeBet', { user: '@tg_player', amount: rb });
+            } else if(rs==="FLY" && rb>0) {
+                let win = rb*rm; balance += win; 
+                let res = document.getElementById('my-res');
+                if(res) { res.innerText = rm.toFixed(2)+"x"; res.style.color="var(--green)"; res.parentElement.lastElementChild.innerText = win.toFixed(2) + " ₴"; }
+                rb=0; save();
+                document.getElementById('r-btn').innerText="ЗАБРАНО!"; document.getElementById('r-btn').style.background="var(--green)";
+            }
+        }
+
+        setInterval(() => {
+            if(!document.getElementById('screen-rocket').classList.contains('active')) return;
+            if(rs==="WAIT") {
+                rt-=0.016; document.getElementById('r-mult').innerText = Math.ceil(rt)+".00s";
+                if(rt<=0) { 
+                    rs="FLY"; 
+                    let rnd = Math.random();
+                    if(rnd < 0.1) rc = 1.00; 
+                    else if(rnd < 0.8) rc = (Math.random() * 1.7 + 1.01); 
+                    else rc = (Math.random() * 7 + 2.71);
+                    document.getElementById('rocket-vid').play(); 
+                    document.getElementById('rocket-box').style.transform="translateY(-400px)"; 
+                }
+            } else if(rs==="FLY") {
+                rm += 0.004 * Math.sqrt(rm);
+                document.getElementById('r-mult').innerText = rm.toFixed(2)+"x";
+                if(rb>0) document.getElementById('r-btn').innerText="ЗАБРАТИ "+(rb*rm).toFixed(2);
+                if(rm>=rc) { 
+                    rs="CRASH"; document.getElementById('rocket-vid').pause(); 
+                    document.getElementById('rocket-box').style.opacity="0";
+                    document.getElementById('rocket-v').style.background="rgba(255, 59, 48, 0.4)";
+                    document.getElementById('rocket-v').classList.add('shake');
+                    if(rb > 0) { 
+                        let res = document.getElementById('my-res');
+                        if(res) { res.innerText = "CRASH"; res.style.color="var(--red)"; res.parentElement.lastElementChild.innerText = "0.00 ₴"; }
+                        rb = 0; 
+                    }
+                    setTimeout(() => { document.getElementById('rocket-v').classList.remove('shake'); resetR(); }, 3000); 
+                }
+            }
+        }, 16);
+
+        // --- MINES ---
+        let mA=false, mB=0, mO=0, mM=[];
+        function initMines() {
+            const board = document.getElementById('m-board'); board.innerHTML = '';
+            for(let i=0; i<20; i++) {
+                let c = document.createElement('div'); c.className = 'cell';
+                c.onclick = () => {
+                    if(!mA || c.innerHTML !== '') return;
+                    if(mM.includes(i)) {
+                        c.innerHTML = '💣'; c.classList.add('bomb'); mA=false;
+                        document.getElementById('m-status').innerText = "BOOM!";
+                        document.getElementById('m-btn').innerText = "ГРАТИ"; document.getElementById('m-btn').style.background="var(--blue)";
+                        mM.forEach(idx => document.getElementById('m-board').children[idx].innerHTML='💣');
+                    } else {
+                        c.innerHTML = '💎'; c.classList.add('gem'); mO++;
+                        let mult = Math.pow(1.15, mO);
+                        document.getElementById('m-mult').innerText = mult.toFixed(2)+"x";
+                        document.getElementById('m-win').innerText = (mB*mult).toFixed(2)+" ₴";
+                        document.getElementById('m-btn').innerText = "ЗАБРАТИ " + (mB*mult).toFixed(2); document.getElementById('m-btn').style.background = "var(--green)";
+                    }
+                };
+                board.appendChild(c);
+            }
+        }
+        initMines();
+
+        function minesStart() {
+            if(mA) {
+                let mult = Math.pow(1.15, mO); balance += mB*mult; save();
+                mA=false; document.getElementById('m-status').innerText = "WIN: "+(mB*mult).toFixed(2);
+                document.getElementById('m-btn').innerText = "ГРАТИ"; document.getElementById('m-btn').style.background="var(--blue)";
+                return;
+            }
+            let v = parseFloat(document.getElementById('m-input').value);
+            if(v>balance || v<=0) return;
+            balance-=v; mB=v; mO=0; mA=true; save(); mM=[];
+            while(mM.length<5) { let r=Math.floor(Math.random()*20); if(!mM.includes(r)) mM.push(r); }
+            initMines();
+            document.getElementById('m-status').innerText = "УДАЧІ";
+            document.getElementById('m-mult').innerText = "1.00x"; document.getElementById('m-win').innerText = "0.00 ₴";
+            document.getElementById('m-btn').innerText = "У ГРІ"; document.getElementById('m-btn').style.background="#333";
+        }
+    </script>
+</body>
+</html>
