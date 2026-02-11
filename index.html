@@ -8,20 +8,17 @@
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
         
-        /* HEADER */
         .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; flex-shrink: 0; }
         .balance { background: var(--green); color: black; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
-        /* ТАБ ІКСІВ (ЗВЕРХУ) */
+        /* ВЕРХНІЙ ТАБ: ТІЛЬКИ ІСТОРІЯ РАУНДІВ */
         .history-section { padding: 10px 5px; background: #080808; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; }
         .history-list { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; }
         .history-list::-webkit-scrollbar { display: none; }
         .hs-item { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; color: #777; border: 1px solid #333; white-space: nowrap; flex-shrink: 0; }
-        
         .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); min-width: 60px; text-align: center; }
-        .my-win-tab { background: var(--green) !important; color: black !important; border: none !important; }
 
-        /* ІГРОВЕ ПОЛЕ (РАКЕТА ПОСЕРЕДИНІ) */
+        /* ЦЕНТР: РАКЕТА */
         .game-viewport { flex-grow: 1; min-height: 200px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #rocket-v { 
             width: 200px; 
@@ -29,23 +26,24 @@
             top: 50%; 
             left: 50%; 
             transform: translate(-50%, -50%) scale(0); 
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            transition: transform 0.5s ease-out, opacity 0.3s;
         }
 
-        /* ПАНЕЛЬ КЕРУВАННЯ */
+        /* КЕРУВАННЯ */
         .controls { padding: 15px; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
-        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input { flex: 1; background: #000; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; outline: none; text-align: center; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; outline: none; text-align: center; margin-bottom: 10px; box-sizing: border-box; }
         .main-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
-        /* МЕНЮШКА СТАВОК (ЗНИЗУ) */
-        .bets-menu { height: 200px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
+        /* НИЖНІЙ ТАБ: ТВОЇ СТАВКИ ТА ВИГРАШІ */
+        .bets-menu { height: 180px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; }
         .bets-title { padding: 10px 15px; font-size: 11px; color: #555; font-weight: bold; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
         .bets-scroll { flex-grow: 1; overflow-y: auto; padding: 0 15px; scrollbar-width: none; }
         .bets-scroll::-webkit-scrollbar { display: none; }
-        .bet-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 13px; }
-        .u-info { color: #888; display: flex; align-items: center; gap: 6px; }
-        .u-cash { color: #eee; font-weight: bold; }
+        
+        .bet-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px; align-items: center; }
+        .my-bet-info { color: #aaa; font-weight: 500; }
+        .my-win-info { color: var(--green); font-weight: 900; background: rgba(52, 199, 89, 0.1); padding: 4px 8px; border-radius: 6px; }
+        .my-loss-info { color: var(--red); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -58,12 +56,7 @@
     <div class="history-section">
         <div class="history-list" id="hs-list">
             <div id="live-tab" class="hs-item active-tab">5.0s</div>
-            <div class="hs-item">1.45x</div>
-            <div class="hs-item">2.10x</div>
-            <div class="hs-item">1.10x</div>
-            <div class="hs-item">8.40x</div>
-            <div class="hs-item">1.02x</div>
-        </div>
+            </div>
     </div>
 
     <div class="game-viewport">
@@ -73,29 +66,26 @@
     </div>
 
     <div class="controls">
-        <div class="input-row">
-            <input type="number" id="bet-amt" value="100">
-        </div>
+        <input type="number" id="bet-amt" value="100">
         <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
     </div>
 
     <div class="bets-menu">
         <div class="bets-title">
-            <span>LIVE СТАВКИ</span>
-            <span>СУМА</span>
+            <span>ВАШІ СТАВКИ</span>
+            <span>РЕЗУЛЬТАТ</span>
         </div>
-        <div class="bets-scroll" id="bets-list">
+        <div class="bets-scroll" id="my-bets-list">
             </div>
     </div>
 
     <script>
         let balance = 500.00;
         let myBet = 0;
+        let currentBetAmount = 0;
         let mode = "WAIT"; 
         let currentMult = 1.00;
         let timer = 5.0;
-
-        const names = ["@alex", "@marta", "@vova", "@king", "@wolf", "@user1", "@lucky", "@denis", "@anna"];
 
         function updateBal() {
             document.getElementById('bal-val').innerText = balance.toFixed(2);
@@ -119,9 +109,6 @@
             document.getElementById('action-btn').style.background = "var(--blue)";
             document.getElementById('action-btn').style.color = "white";
 
-            // Оновлюємо список ставок
-            refreshBets();
-
             let t = setInterval(() => {
                 timer -= 0.1;
                 tab.innerText = Math.max(0, timer).toFixed(1) + "s";
@@ -143,7 +130,7 @@
             v.play();
             v.style.transform = "translate(-50%, -50%) scale(1.1)";
 
-            let crashPoint = (1.05 + Math.random() * 2 + (Math.random() > 0.8 ? 5 : 0)).toFixed(2);
+            let crashPoint = (1.05 + Math.random() * 2.5 + (Math.random() > 0.8 ? 4 : 0)).toFixed(2);
 
             let fly = setInterval(() => {
                 currentMult += 0.01;
@@ -167,9 +154,16 @@
             if(myBet > 0) {
                 document.getElementById('action-btn').innerText = "ПРОГРАШ";
                 document.getElementById('action-btn').style.background = "var(--red)";
+                addBetToBottom(currentBetAmount, "LOSS", cp);
             }
 
-            addToHistory(cp + "x", false);
+            // Додаємо ікс раунду у ВЕРХНІЙ таб
+            const hsList = document.getElementById('hs-list');
+            const item = document.createElement('div');
+            item.className = "hs-item";
+            item.innerText = cp + "x";
+            hsList.insertBefore(item, hsList.children[1]);
+
             setTimeout(startCycle, 3000);
         }
 
@@ -178,8 +172,10 @@
             const amt = parseFloat(document.getElementById('bet-amt').value);
 
             if(mode === "WAIT" && myBet === 0) {
-                if(amt > balance) return;
-                balance -= amt; myBet = amt;
+                if(amt > balance || amt <= 0) return;
+                balance -= amt; 
+                myBet = amt;
+                currentBetAmount = amt;
                 updateBal();
                 btn.innerText = "ПРИЙНЯТО";
                 btn.style.background = "#333";
@@ -187,39 +183,34 @@
                 let win = myBet * currentMult;
                 balance += win;
                 
-                // Твій виграш летить у верхній таб іксів
-                addToHistory(`${currentMult.toFixed(2)}x (+${win.toFixed(0)}₴)`, true);
+                // Додаємо результат у НИЖНІЙ таб (твій ікс + сума виграшу)
+                addBetToBottom(myBet, "WIN", currentMult.toFixed(2), win.toFixed(0));
                 
                 myBet = 0;
                 updateBal();
-                btn.innerText = "WIN: " + win.toFixed(0) + "₴";
+                btn.innerText = "ЗАБРАНО: " + win.toFixed(0) + " ₴";
                 btn.style.background = "var(--green)";
                 btn.style.color = "black";
             }
         }
 
-        function addToHistory(text, isMyWin) {
-            const hsList = document.getElementById('hs-list');
-            const item = document.createElement('div');
-            item.className = isMyWin ? "hs-item my-win-tab" : "hs-item";
-            item.innerText = text;
-            hsList.insertBefore(item, hsList.children[1]);
-            hsList.scrollLeft = 0;
-        }
-
-        function refreshBets() {
-            const list = document.getElementById('bets-list');
-            list.innerHTML = "";
-            for(let i=0; i<20; i++) {
-                const u = names[Math.floor(Math.random()*names.length)];
-                const a = Math.floor(Math.random()*1500) + 20;
-                list.innerHTML += `
-                    <div class="bet-row">
-                        <div class="u-info">👤 ${u}</div>
-                        <div class="u-cash">${a} ₴</div>
-                    </div>
+        function addBetToBottom(bet, status, x, winAmt) {
+            const list = document.getElementById('my-bets-list');
+            const row = document.createElement('div');
+            row.className = "bet-row";
+            
+            if(status === "WIN") {
+                row.innerHTML = `
+                    <div class="my-bet-info">💰 Ставка: ${bet} ₴</div>
+                    <div class="my-win-info">${x}x (+${winAmt} ₴)</div>
+                `;
+            } else {
+                row.innerHTML = `
+                    <div class="my-bet-info">💰 Ставка: ${bet} ₴</div>
+                    <div class="my-loss-info">CRASH @ ${x}x</div>
                 `;
             }
+            list.prepend(row);
         }
 
         window.onload = startCycle;
