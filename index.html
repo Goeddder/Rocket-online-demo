@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Solo 🚀</title>
+    <title>Giftup Solo Only 🚀</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --card: #141416; }
         body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 70%, #fff, transparent); background-size: 300px 300px; opacity: 0.1; pointer-events: none; }
-
         .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; height: 50px; position: relative; z-index: 100; box-sizing: border-box; }
         .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
@@ -40,14 +38,15 @@
         .main-btn { width: 100%; padding: 18px; border-radius: 10px; border: none; font-size: 17px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
         /* СПИСОК СТАВОК (ГОРТАЄТЬСЯ) */
-        .bets-menu { height: 100px; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; }
+        .bets-menu { height: 100px; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; scrollbar-width: none; }
+        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { transform: translateY(5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
         .user-info { display: flex; align-items: center; gap: 8px; }
         .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #222; }
     </style>
 </head>
 <body>
-    <div class="stars"></div>
     <div class="header">
         <div style="font-weight: 900;">GIFTUP</div>
         <div class="balance"><span id="bal-val">500.00</span> ₴</div>
@@ -142,14 +141,18 @@
                 if (amt > balance || amt <= 0) return;
                 balance -= amt; myBet = amt; hasWon = false;
                 updateBal();
-                document.getElementById('bet-list').innerHTML = `
+                
+                // Твоя ставка завжди перша
+                const betList = document.getElementById('bet-list');
+                betList.innerHTML = `
                     <div class="bet-row">
                         <div class="user-info">
                             <img src="${uPhoto}" class="mini-avatar">
-                            <span>${uName}</span>
+                            <span style="color:var(--blue)">${uName}</span>
                         </div>
                         <span id="live-x" style="font-weight:bold;">${amt} ₴</span>
                     </div>`;
+                    
                 btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#111";
             } 
             else if (ms >= 6000 && myBet > 0 && !hasWon) {
@@ -183,7 +186,7 @@
                 }
                 lastRoundId = rId;
                 if (!hasWon) myBet = 0;
-                document.getElementById('bet-list').innerHTML = "";
+                document.getElementById('bet-list').innerHTML = ""; // Очистка на новий раунд
             }
 
             const cX = getCrash(rId);
