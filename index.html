@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup TG-Sync 🚀</title>
+    <title>Giftup Galaxy Fixed 🚀</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue: #007aff; --cyan: #00f2ff; --green: #34c759; --red: #ff3b30; --card: #141416; }
         body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 15% 15%, #fff, transparent), radial-gradient(1px 1px at 85% 85%, #fff, transparent); background-size: 250px 250px; opacity: 0.2; pointer-events: none; }
+        /* КОСМІЧНИЙ ДЕКОР */
+        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1.5px 1.5px at 70% 70%, #fff, transparent), radial-gradient(1px 1px at 50% 10%, #fff, transparent); background-size: 300px 300px; opacity: 0.2; pointer-events: none; z-index: 1; }
+        .nebula { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(0, 122, 255, 0.05), transparent 70%); pointer-events: none; }
+
         .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; height: 50px; position: relative; z-index: 100; box-sizing: border-box; }
         .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
@@ -17,31 +20,38 @@
         .screen.active { display: flex; }
 
         /* ЛОББІ */
-        .profile-card { background: var(--card); border-radius: 15px; padding: 15px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; margin: 20px; }
+        .profile-card { background: var(--card); border-radius: 15px; padding: 15px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; margin: 20px; position: relative; z-index: 10; }
         .avatar-img { width: 45px; height: 45px; border-radius: 50%; background: var(--blue); object-fit: cover; border: 2px solid #333; }
-        .game-card { background: var(--card); border-radius: 20px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; }
+        .game-card { background: var(--card); border-radius: 20px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; position: relative; z-index: 10; }
         
-        /* ГРА */
-        .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: radial-gradient(circle at center, #001a33 0%, #000 80%); }
-        #rocket-v { width: 240px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; filter: drop-shadow(0 0 15px var(--cyan)); }
+        /* ГРА (ЧОРНИЙ ФОН) */
+        .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
+        .saturn-ring { position: absolute; width: 200px; height: 50px; border: 1px solid rgba(0, 242, 255, 0.15); border-radius: 50%; transform: rotate(-15deg); filter: blur(1px); }
+        
+        #rocket-v { width: 240px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; filter: drop-shadow(0 0 15px var(--cyan)); position: relative; z-index: 5; }
 
-        .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; }
-        .hs-item { background: #111; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #666; }
+        .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+        .history-section::-webkit-scrollbar { display: none; }
+        .hs-item { background: #111; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #666; min-width: 45px; text-align: center; }
         .active-tab { border-color: var(--blue); color: var(--blue); }
+        .past-item { color: #aaa; border-color: #333; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; }
-        input { width: 100%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; }
+        .back-btn { margin: 10px 15px; background: #111; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 8px; font-size: 11px; width: fit-content; cursor: pointer; border: none; }
+
+        .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; z-index: 10; }
+        input { width: 100%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
         .main-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 900; color: white; cursor: pointer; text-transform: uppercase; }
 
-        /* СПИСОК СТАВОК */
         .bets-menu { height: 80px; background: #0a0a0a; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         .user-info { display: flex; align-items: center; gap: 8px; }
         .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
+    <div class="nebula"></div>
     <div class="header">
         <div style="font-weight: 900;">GIFTUP</div>
         <div class="balance"><span id="bal-val">500.00</span> ₴</div>
@@ -63,9 +73,16 @@
     </div>
 
     <div id="rocket-screen" class="screen">
-        <div class="history-section"><div id="live-tab" class="hs-item active-tab">0.0s</div></div>
+        <div class="history-section" id="hs-container">
+            <div id="live-tab" class="hs-item active-tab">0.0s</div>
+        </div>
+        <button class="back-btn" onclick="closeGame()">← ВИЙТИ</button>
         <div class="game-viewport">
-            <video id="rocket-v" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4"></video>
+            <div class="saturn-ring"></div>
+            <div class="saturn-ring" style="width: 210px; height: 60px; opacity: 0.5;"></div>
+            <video id="rocket-v" playsinline muted loop>
+                <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
+            </video>
         </div>
         <div class="controls">
             <input type="number" id="bet-amt" value="100">
@@ -76,28 +93,52 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Розгортаємо на весь екран
+        tg.expand();
 
-        const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "Невідомо", photo_url: "" };
-
-        // Встановлюємо дані з Telegram
+        const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "777", photo_url: "" };
         document.getElementById('user-name').innerText = user.username ? "@" + user.username : user.first_name;
         document.getElementById('user-id').innerText = `ID: ${user.id} • VERIFIED`;
         if(user.photo_url) document.getElementById('user-photo').src = user.photo_url;
 
-        let balance = 500.00;
+        let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500.00;
         let myBet = 0;
         let hasWon = false;
+        let lastRoundId = -1;
+        let history = JSON.parse(localStorage.getItem('rocket_history')) || [];
 
         const CYCLE = 20000; 
         const WAIT = 6000;
 
+        function updateBal() {
+            document.getElementById('bal-val').innerText = balance.toFixed(2);
+            localStorage.setItem('giftup_bal', balance);
+        }
+
         function openGame() {
             document.getElementById('lobby-screen').classList.remove('active');
             document.getElementById('rocket-screen').classList.add('active');
+            renderHistory();
+        }
+
+        function closeGame() {
+            document.getElementById('rocket-screen').classList.remove('active');
+            document.getElementById('lobby-screen').classList.add('active');
         }
 
         function getCrash(rId) { return 1.1 + ((rId * 157) % 40) / 10; }
+
+        function renderHistory() {
+            const container = document.getElementById('hs-container');
+            // Очищуємо все крім live-таба
+            while (container.children.length > 1) container.removeChild(container.lastChild);
+            // Додаємо ікси з масиву
+            history.forEach(val => {
+                const item = document.createElement('div');
+                item.className = 'hs-item past-item';
+                item.innerText = val.toFixed(2) + 'x';
+                container.appendChild(item);
+            });
+        }
 
         function doAction() {
             const ms = Date.now() % CYCLE;
@@ -107,9 +148,7 @@
             if (ms < WAIT && myBet === 0) {
                 if (amt > balance) return;
                 balance -= amt; myBet = amt; hasWon = false;
-                document.getElementById('bal-val').innerText = balance.toFixed(2);
-                
-                // Додаємо нік та аватарку у список ставок
+                updateBal();
                 document.getElementById('bet-list').innerHTML = `
                     <div class="bet-row">
                         <div class="user-info">
@@ -125,7 +164,7 @@
                 if (curX < getCrash(Math.floor(Date.now() / CYCLE))) {
                     let win = myBet * curX;
                     balance += win; hasWon = true; myBet = 0;
-                    document.getElementById('bal-val').innerText = balance.toFixed(2);
+                    updateBal();
                     btn.innerText = `+${win.toFixed(0)} ₴`; btn.style.background = "var(--green)";
                 }
             }
@@ -139,16 +178,31 @@
             const rocket = document.getElementById('rocket-v');
             const btn = document.getElementById('action-btn');
 
+            // КІНЕЦЬ РАУНДУ: Збереження в історію
+            if (rId !== lastRoundId) {
+                if (lastRoundId !== -1) {
+                    const prevCrash = getCrash(lastRoundId);
+                    history.unshift(prevCrash); // Додаємо в початок
+                    if (history.length > 15) history.pop(); // Максимум 15 записів
+                    localStorage.setItem('rocket_history', JSON.stringify(history));
+                    renderHistory();
+                }
+                lastRoundId = rId;
+                if (!hasWon) myBet = 0;
+                document.getElementById('bet-list').innerHTML = "";
+            }
+
             const cX = getCrash(rId);
             const cMs = (cX - 1) / 0.15 * 1000;
 
             if (ms < WAIT) {
                 tab.innerText = ((WAIT - ms) / 1000).toFixed(1) + "s";
+                tab.style.color = "var(--blue)";
                 rocket.style.transform = "scale(0)"; rocket.pause();
-                if(myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; }
+                if(myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; btn.style.color="white"; }
             } else if (ms < WAIT + cMs) {
                 const curX = (1 + ((ms - WAIT) / 1000) * 0.15).toFixed(2);
-                tab.innerText = curX + "x";
+                tab.innerText = curX + "x"; tab.style.color = "var(--green)";
                 rocket.style.transform = "scale(1)"; rocket.play();
                 if(myBet > 0 && !hasWon) {
                     btn.innerText = "ЗАБРАТИ " + (myBet * curX).toFixed(0);
@@ -156,12 +210,15 @@
                     if(document.getElementById('live-x')) document.getElementById('live-x').innerText = curX + "x";
                 }
             } else {
-                tab.innerText = cX.toFixed(2) + "x"; rocket.style.transform = "scale(0)";
-                if(myBet > 0) { btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; myBet = 0; }
+                tab.innerText = cX.toFixed(2) + "x"; tab.style.color = "var(--red)";
+                rocket.style.transform = "scale(0)";
+                if(myBet > 0 && !hasWon) { btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; btn.style.color="white"; myBet = 0; }
             }
         }
 
         setInterval(main, 50);
+        updateBal();
+        renderHistory();
     </script>
 </body>
 </html>
