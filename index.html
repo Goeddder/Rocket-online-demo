@@ -3,103 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Online 🚀</title>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <title>Giftup Lobby 🚀</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; user-select: none; }
-        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .balance { background: var(--green); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
-        .tabs { display: flex; gap: 10px; padding: 15px; }
-        .tab { flex: 1; padding: 12px; background: #1c1c1e; border-radius: 10px; text-align: center; cursor: pointer; }
-        .tab.active { background: #333; border: 1px solid var(--blue); }
-        .game { display: none; padding: 15px; }
-        .game.active { display: block; }
-        .viewport { height: 200px; background: #050505; border-radius: 15px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        #rocket-vid { width: 150px; position: absolute; bottom: -180px; transition: 0.4s; }
-        .mult { font-size: 40px; font-weight: 900; z-index: 5; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; }
+        
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #000; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
+
+        /* ЕКРАНИ */
+        .screen { display: none; padding: 15px; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ЛОБІ */
+        .user-preview { background: var(--card); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border: 1px solid #333; }
+        .avatar-circle { width: 50px; height: 50px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .game-card { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid #333; position: relative; cursor: pointer; transition: 0.2s; }
+        .game-card:active { transform: scale(0.95); }
+        .game-card img { width: 100%; height: 120px; object-fit: cover; opacity: 0.6; }
+        .game-info { padding: 12px; font-weight: bold; text-align: center; background: #252527; }
+
+        /* ГРА */
+        .back-btn { background: #222; color: white; border: none; padding: 10px 15px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; font-weight: bold; }
+        .viewport { height: 200px; background: #050505; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; }
+        #rocket-v { width: 140px; position: absolute; bottom: -180px; transition: 0.4s; }
+        .multiplier { font-size: 45px; font-weight: 900; z-index: 10; }
+        
+        .bet-pnl { background: var(--card); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; box-sizing: border-box; margin-bottom: 12px; outline: none; }
+        .go-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
+
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
         .cell { aspect-ratio: 1; background: #2c2c2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .controls { background: #111; padding: 15px; border-radius: 15px; margin-top: 15px; }
-        input { width: 100%; background: #1c1c1e; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; color: white; font-size: 16px; }
     </style>
 </head>
 <body>
-    <div class="header"><span>@tg_player</span><div class="balance"><span id="bal">500.00</span> ₴</div></div>
-    <div class="tabs">
-        <div class="tab active" onclick="tab('rocket')">ROCKET</div>
-        <div class="tab" onclick="tab('mines')">MINES</div>
+
+    <div class="header">
+        <span style="font-weight: 900; letter-spacing: 1px;">GIFTUP</span>
+        <div class="balance"><span id="bal-txt">500.00</span> ₴</div>
     </div>
 
-    <div id="rocket" class="game active">
+    <div id="lobby-screen" class="screen active">
+        <div class="user-preview">
+            <div class="avatar-circle">👤</div>
+            <div>
+                <div style="font-weight: bold;">@tg_player</div>
+                <div style="font-size: 12px; color: var(--blue);">ID: 55012 • VIP</div>
+            </div>
+        </div>
+
+        <h3 style="margin: 10px 5px;">Усі ігри</h3>
+        <div class="games-grid">
+            <div class="game-card" onclick="showScreen('rocket-screen')">
+                <img src="https://files.catbox.moe/d13y9l.mp4" alt="Rocket"> <div class="game-info">ROCKET 🚀</div>
+            </div>
+            <div class="game-card" onclick="showScreen('mines-screen')">
+                <img src="https://images.unsplash.com/photo-1614332287897-cdc485fa562d?auto=format&fit=crop&q=80&w=300" alt="Mines">
+                <div class="game-info">MINES 💎</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rocket-screen" class="screen">
+        <button class="back-btn" onclick="showScreen('lobby-screen')">← Назад в Лобі</button>
         <div class="viewport">
-            <div id="r-mult" class="mult">Чекаємо сервер...</div>
-            <video id="rocket-vid" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4"></video>
+            <div id="r-mult" class="multiplier">З'єднання...</div>
+            <video id="rocket-v" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4"></video>
         </div>
-        <div class="controls">
+        <div class="bet-pnl">
             <input type="number" id="r-amt" value="100">
-            <button id="r-btn" class="btn" style="background:var(--blue)" onclick="rAction()">СТАВКА</button>
+            <button id="r-btn" class="go-btn" style="background:var(--blue)" onclick="rBet()">СТАВКА</button>
         </div>
     </div>
 
-    <div id="mines" class="game">
-        <div class="grid" id="m-grid"></div>
-        <div class="controls">
+    <div id="mines-screen" class="screen">
+        <button class="back-btn" onclick="showScreen('lobby-screen')">← Назад в Лобі</button>
+        <div class="mines-grid" id="m-grid"></div>
+        <div class="bet-pnl">
             <input type="number" id="m-amt" value="100">
-            <button id="m-btn" class="btn" style="background:var(--blue)" onclick="mStart()">ПОЧАТИ ГРУ</button>
+            <button class="go-btn" style="background:var(--blue)" onclick="mStart()">ПОЧАТИ ГРУ</button>
         </div>
     </div>
 
     <script>
         const socket = io('https://rocket-online-demo.onrender.com');
-        let bal = 500;
+        let balance = 500;
         let myBet = 0;
         let rStatus = "WAIT";
 
-        function tab(g) {
-            document.querySelectorAll('.game, .tab').forEach(e => e.classList.remove('active'));
-            document.getElementById(g).classList.add('active');
-            event.currentTarget.classList.add('active');
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        // ROCKET ONLINE
+        function updateBal() {
+            document.getElementById('bal-txt').innerText = balance.toFixed(2);
+        }
+
+        // Rocket Online Logic
         socket.on('gameTick', (data) => {
             rStatus = data.gameState;
             const m = document.getElementById('r-mult');
-            const v = document.getElementById('rocket-vid');
-            const b = document.getElementById('r-btn');
+            const v = document.getElementById('rocket-v');
+            const btn = document.getElementById('r-btn');
             
             if(data.gameState === "WAIT") {
                 m.innerText = data.timer + ".00s";
                 v.style.transform = "translateY(0)";
-                if(myBet === 0) b.innerText = "СТАВКА";
+                if(myBet === 0) btn.innerText = "СТАВКА";
             } else if(data.gameState === "FLY") {
                 m.innerText = data.multiplier + "x";
                 v.play(); v.style.transform = "translateY(-250px)";
-                if(myBet > 0) b.innerText = "ЗАБРАТИ " + (myBet * data.multiplier).toFixed(2);
+                if(myBet > 0) btn.innerText = "ЗАБРАТИ " + (myBet * data.multiplier).toFixed(2);
             } else {
                 m.innerText = "BOOM!";
                 myBet = 0;
             }
         });
 
-        function rAction() {
+        function rBet() {
             let a = +document.getElementById('r-amt').value;
-            if(rStatus === "WAIT" && myBet === 0 && a <= bal) {
-                bal -= a; myBet = a; document.getElementById('bal').innerText = bal.toFixed(2);
-                socket.emit('placeBet', {user: '@player', amount: a});
+            if(rStatus === "WAIT" && myBet === 0 && a <= balance) {
+                balance -= a; myBet = a; updateBal();
+                socket.emit('placeBet', {user: '@tg_player', amount: a});
             } else if(myBet > 0 && rStatus === "FLY") {
-                bal += myBet * parseFloat(document.getElementById('r-mult').innerText);
-                myBet = 0; document.getElementById('bal').innerText = bal.toFixed(2);
+                balance += myBet * parseFloat(document.getElementById('r-mult').innerText);
+                myBet = 0; updateBal();
             }
         }
 
-        // MINES WORKING LOGIC
-        let mines = [];
         function mStart() {
-            const g = document.getElementById('m-grid');
-            g.innerHTML = ''; mines = [];
+            const g = document.getElementById('m-grid'); g.innerHTML = '';
             for(let i=0; i<25; i++) {
                 let c = document.createElement('div'); c.className = 'cell';
                 c.onclick = () => { c.innerText = "💎"; c.style.background = "#34c759"; };
