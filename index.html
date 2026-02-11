@@ -7,37 +7,39 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
         :root { --blue: #007aff; --green: #34c759; --bg: #000; --card: #1c1c1e; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; }
         
         /* HEADER */
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; position: sticky; top: 0; z-index: 100; }
         .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
 
         /* SCREENS */
-        .screen { display: none; padding: 15px; animation: fadeIn 0.3s ease; }
+        .screen { display: none; padding: 15px; animation: fadeIn 0.3s ease; height: 100vh; box-sizing: border-box; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* LOBBY & PROFILE */
         .user-card { background: var(--card); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid #333; }
-        .avatar { width: 50px; height: 50px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #333; }
+        .avatar { width: 50px; height: 50px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #333; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
         
         .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .g-item { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .g-item:active { transform: scale(0.96); }
-        .g-preview { height: 90px; background: #252527; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .g-preview { height: 90px; background: #252527; display: flex; align-items: center; justify-content: center; font-size: 35px; }
         .g-name { padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
 
-        /* GAME VIEW */
+        /* ROCKET SCREEN */
         .back-btn { background: #222; border: none; color: #aaa; padding: 8px 12px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; }
-        .viewport { height: 220px; background: #050505; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; }
-        #rocket-v { width: 150px; position: absolute; bottom: -200px; transition: 0.4s; }
-        .multiplier { font-size: 45px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .viewport { height: 220px; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; }
+        #rocket-v { width: 140px; position: absolute; bottom: -180px; transition: 0.4s; z-index: 1; }
+        .multiplier { font-size: 50px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(0,0,0,0.8); color: white; }
 
         .controls { background: var(--card); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
         input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
-        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
+        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; transition: 0.2s; }
 
+        .status-bar { text-align: center; margin-top: 20px; font-size: 11px; color: #555; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     </style>
 </head>
@@ -50,9 +52,9 @@
 
     <div id="lobby-screen" class="screen active">
         <div class="user-card">
-            <div class="avatar">👤</div>
+            <div class="avatar" id="tg-avatar">👤</div>
             <div>
-                <div style="font-weight: bold; font-size: 16px;">@tg_player</div>
+                <div id="tg-nickname" style="font-weight: bold; font-size: 16px;">@tg_player</div>
                 <div style="font-size: 11px; color: var(--blue);">ID: 55012 • VIP PLAYER</div>
             </div>
         </div>
@@ -69,43 +71,39 @@
             </div>
         </div>
         
-        <div id="conn-status" style="text-align: center; margin-top: 30px; font-size: 12px; color: #555;">
-            <span class="status-dot" style="background: #ff3b30;"></span> Перевірка сервера...
+        <div class="status-bar" id="conn-status">
+            <span class="status-dot" style="background: #ff3b30;"></span> Пошук сервера...
         </div>
     </div>
 
     <div id="rocket-screen" class="screen">
-        <button class="back-btn" onclick="changeScreen('lobby-screen')">← Назад</button>
+        <button class="back-btn" onclick="changeScreen('lobby-screen')">← Назад в Лобі</button>
         <div class="viewport">
-            <div id="r-mult" class="multiplier">З'єднання...</div>
-            <video id="rocket-v" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4"></video>
+            <div id="r-mult" class="multiplier">1.00x</div>
+            <video id="rocket-v" playsinline muted loop>
+                <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
+            </video>
         </div>
         <div class="controls">
-            <input type="number" id="r-amt" value="100">
+            <input type="number" id="r-amt" value="100" min="10">
             <button id="r-btn" class="btn" style="background:var(--blue)" onclick="handleRocket()">СТАВКА</button>
         </div>
     </div>
 
     <div id="mines-screen" class="screen">
         <button class="back-btn" onclick="changeScreen('lobby-screen')">← Назад</button>
-        <div style="text-align:center; padding: 50px 0;">
-            <div style="font-size: 50px;">💎</div>
-            <h2>MINES</h2>
-            <p style="color:#666;">Ця гра в розробці</p>
+        <div style="text-align:center; padding: 40px 0;">
+            <div style="font-size: 60px;">💎</div>
+            <h2>MINES ONLINE</h2>
+            <p style="color:#666;">Технічні роботи</p>
         </div>
     </div>
 
     <script>
-        // Ініціалізація Socket з налаштуваннями стабільності
-        const socket = io('https://rocket-online-demo.onrender.com', {
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionAttempts: Infinity
-        });
-
+        const socket = io('https://rocket-online-demo.onrender.com', { reconnectionAttempts: 5 });
         let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500;
         let activeBet = 0;
-        let gameState = "WAIT";
+        let isDemo = true; // Якщо сервер не знайдено, вмикаємо демо
 
         function updateUI() {
             localStorage.setItem('giftup_bal', balance);
@@ -118,65 +116,66 @@
             document.getElementById(id).classList.add('active');
         }
 
-        // Статус сервера
+        // Логіка підключення
         socket.on('connect', () => {
-            document.getElementById('conn-status').innerHTML = '<span class="status-dot" style="background:#34c759"></span> Сервер онлайн';
-            document.getElementById('r-mult').innerText = "Готово";
+            isDemo = false;
+            document.getElementById('conn-status').innerHTML = '<span class="status-dot" style="background:#34c759"></span> Сервер онлайн ✅';
         });
 
-        socket.on('connect_error', () => {
-            document.getElementById('conn-status').innerHTML = '<span class="status-dot" style="background:#ff3b30"></span> Сервер спить (пробудження...)';
-            document.getElementById('r-mult').innerText = "Чекаємо...";
-        });
-
-        // Основний цикл гри
         socket.on('gameTick', (data) => {
-            gameState = data.gameState;
-            const multDisplay = document.getElementById('r-mult');
-            const rocketVid = document.getElementById('rocket-v');
-            const betBtn = document.getElementById('r-btn');
-
-            if (gameState === "WAIT") {
-                multDisplay.innerText = data.timer + ".00s";
-                multDisplay.style.fontSize = "45px";
-                rocketVid.style.transform = "translateY(0)";
-                rocketVid.style.opacity = "1";
-                if (activeBet === 0) {
-                    betBtn.innerText = "СТАВКА";
-                    betBtn.style.background = "var(--blue)";
-                }
-            } else if (gameState === "FLY") {
-                multDisplay.innerText = data.multiplier + "x";
-                rocketVid.play();
-                rocketVid.style.transform = "translateY(-250px)";
-                if (activeBet > 0) {
-                    betBtn.innerText = "ЗАБРАТИ " + (activeBet * data.multiplier).toFixed(2);
-                    betBtn.style.background = "var(--green)";
-                    betBtn.style.color = "black";
-                }
-            } else if (gameState === "CRASH") {
-                multDisplay.innerText = "BOOM!";
-                rocketVid.style.opacity = "0";
-                rocketVid.pause();
-                activeBet = 0;
-                betBtn.innerText = "СТАВКА";
-                betBtn.style.background = "var(--blue)";
-            }
+            if (isDemo) return;
+            updateGame(data.gameState, data.multiplier, data.timer);
         });
+
+        // ДЕМО-РЕЖИМ (якщо сервер мовчить)
+        setInterval(() => {
+            if (isDemo && document.getElementById('rocket-screen').classList.contains('active')) {
+                let fakeMult = (1 + Math.random() * 2).toFixed(2);
+                updateGame("FLY", fakeMult, 0);
+            }
+        }, 2000);
+
+        function updateGame(state, mult, timer) {
+            const mDisp = document.getElementById('r-mult');
+            const v = document.getElementById('rocket-v');
+            const btn = document.getElementById('r-btn');
+
+            if (state === "WAIT") {
+                mDisp.innerText = timer + ".00s";
+                v.style.transform = "translateY(0)";
+                v.style.opacity = "1";
+                if (activeBet === 0) {
+                    btn.innerText = "СТАВКА";
+                    btn.style.background = "var(--blue)";
+                }
+            } else if (state === "FLY") {
+                mDisp.innerText = mult + "x";
+                v.play();
+                v.style.transform = "translateY(-250px)";
+                if (activeBet > 0) {
+                    btn.innerText = "ЗАБРАТИ " + (activeBet * mult).toFixed(2);
+                    btn.style.background = "var(--green)";
+                    btn.style.color = "black";
+                }
+            } else if (state === "CRASH") {
+                mDisp.innerText = "BOOM!";
+                v.style.opacity = "0";
+                activeBet = 0;
+            }
+        }
 
         function handleRocket() {
-            const amount = parseFloat(document.getElementById('r-amt').value);
-            
-            if (gameState === "WAIT" && activeBet === 0 && amount <= balance) {
-                balance -= amount;
-                activeBet = amount;
+            const amt = parseFloat(document.getElementById('r-amt').value);
+            if (activeBet === 0 && amt <= balance) {
+                balance -= amt;
+                activeBet = amt;
                 updateUI();
-                socket.emit('placeBet', { user: '@tg_player', amount: amount });
+                if (!isDemo) socket.emit('placeBet', { user: '@tg_player', amount: amt });
                 document.getElementById('r-btn').innerText = "ОЧІКУВАННЯ...";
                 document.getElementById('r-btn').style.background = "#333";
-            } else if (activeBet > 0 && gameState === "FLY") {
-                const currentMult = parseFloat(document.getElementById('r-mult').innerText);
-                balance += (activeBet * currentMult);
+            } else if (activeBet > 0) {
+                let m = parseFloat(document.getElementById('r-mult').innerText) || 1.0;
+                balance += (activeBet * m);
                 activeBet = 0;
                 updateUI();
                 document.getElementById('r-btn').innerText = "СТАВКА";
