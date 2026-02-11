@@ -6,31 +6,31 @@
     <title>Giftup Online 🚀</title>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <style>
-        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #1c1c1e; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; sticky: top; z-index: 100; background: #000; }
+        :root { --blue: #007aff; --green: #34c759; --bg: #000; --card: #1c1c1e; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; }
         .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
         .screen { display: none; padding: 15px; }
         .screen.active { display: block; }
         
-        /* LOBBY */
         .user-info { background: var(--card); padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid #333; }
         .avatar { width: 45px; height: 45px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        
         .game-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .g-card { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #333; cursor: pointer; text-align: center; }
-        .g-card img { width: 100%; height: 100px; object-fit: cover; opacity: 0.7; }
-        .g-card div { padding: 10px; font-weight: bold; font-size: 14px; }
+        .g-card div { padding: 10px; font-weight: bold; }
 
-        /* GAME ELEMENTS */
-        .back-btn { background: #222; border: none; color: #888; padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; }
-        .viewport { height: 200px; background: #050505; border-radius: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; }
+        .viewport { height: 200px; background: #050505; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid #222; }
         #rocket-v { width: 140px; position: absolute; bottom: -180px; transition: 0.4s; }
-        .mult { font-size: 45px; font-weight: 900; z-index: 10; }
+        .mult { font-size: 40px; font-weight: 900; z-index: 10; text-align: center; }
+        
         .controls { background: var(--card); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
-        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 12px; box-sizing: border-box; }
         .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
-        .m-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .cell { aspect-ratio: 1; background: #2c2c2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .back-btn { background: #222; border: none; color: #888; padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; }
+
+        /* Лог помилок для тебе */
+        #debug-info { font-size: 10px; color: #444; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -44,45 +44,42 @@
         <div class="user-info">
             <div class="avatar">👤</div>
             <div>
-                <div style="font-weight: bold;">@tg_player</div>
+                <div id="u-name" style="font-weight: bold;">@tg_player</div>
                 <div style="font-size: 11px; color: var(--blue);">ID: 55012 • VIP PLAYER</div>
             </div>
         </div>
         <div class="game-grid">
             <div class="g-card" onclick="go('rocket')">
-                <img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=300" alt="Rocket">
-                <div>ROCKET 🚀</div>
+                <div style="height:80px; background:#222; display:flex; align-items:center; justify-content:center;">🚀</div>
+                <div>ROCKET</div>
             </div>
             <div class="g-card" onclick="go('mines')">
-                <img src="https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=300" alt="Mines">
-                <div>MINES 💎</div>
+                <div style="height:80px; background:#222; display:flex; align-items:center; justify-content:center;">💎</div>
+                <div>MINES</div>
             </div>
         </div>
     </div>
 
     <div id="rocket" class="screen">
-        <button class="back-btn" onclick="go('lobby')">← Назад в Лобі</button>
+        <button class="back-btn" onclick="go('lobby')">← Назад</button>
         <div class="viewport">
-            <div id="r-mult" class="mult">З'єднання...</div>
+            <div id="r-mult" class="mult">Пробудження...</div>
             <video id="rocket-v" playsinline muted loop><source src="https://files.catbox.moe/d13y9l.mp4"></video>
         </div>
         <div class="controls">
             <input type="number" id="r-amt" value="100">
             <button id="r-btn" class="btn" style="background:var(--blue)" onclick="rBet()">СТАВКА</button>
         </div>
-    </div>
-
-    <div id="mines" class="screen">
-        <button class="back-btn" onclick="go('lobby')">← Назад в Лобі</button>
-        <div id="m-grid" class="m-grid"></div>
-        <div class="controls">
-            <input type="number" id="m-amt" value="100">
-            <button class="btn" style="background:var(--blue)" onclick="mStart()">ПОЧАТИ ГРУ</button>
-        </div>
+        <div id="debug-info">Статус: Підключення...</div>
     </div>
 
     <script>
-        const socket = io('https://rocket-online-demo.onrender.com');
+        // Спроба підключення з форсуванням Websockets
+        const socket = io('https://rocket-online-demo.onrender.com', {
+            transports: ['websocket', 'polling'],
+            reconnectionAttempts: 20
+        });
+
         let bal = parseFloat(localStorage.getItem('giftup_bal')) || 500;
         let myBet = 0;
         let rStatus = "WAIT";
@@ -96,19 +93,30 @@
         function go(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'mines') mStart();
         }
 
-        // Rocket Logic
+        // Відстеження статусу
+        socket.on('connect', () => {
+            document.getElementById('debug-info').innerText = "Статус: Онлайн ✅";
+            document.getElementById('r-mult').innerText = "Готово!";
+        });
+
+        socket.on('connect_error', (err) => {
+            document.getElementById('debug-info').innerText = "Помилка: Сервер спить, чекаємо...";
+        });
+
         socket.on('gameTick', (data) => {
             rStatus = data.gameState;
             const m = document.getElementById('r-mult');
             const v = document.getElementById('rocket-v');
             const b = document.getElementById('r-btn');
             
+            m.style.fontSize = "45px";
+
             if(data.gameState === "WAIT") {
                 m.innerText = data.timer + ".00s";
                 v.style.transform = "translateY(0)";
+                v.style.opacity = "1";
                 if(myBet === 0) b.innerText = "СТАВКА";
             } else if(data.gameState === "FLY") {
                 m.innerText = data.multiplier + "x";
@@ -116,6 +124,7 @@
                 if(myBet > 0) b.innerText = "ЗАБРАТИ " + (myBet * data.multiplier).toFixed(2);
             } else {
                 m.innerText = "BOOM!";
+                v.style.opacity = "0";
                 myBet = 0;
             }
         });
@@ -128,15 +137,7 @@
             } else if(myBet > 0 && rStatus === "FLY") {
                 bal += myBet * parseFloat(document.getElementById('r-mult').innerText);
                 myBet = 0; save();
-            }
-        }
-
-        function mStart() {
-            const g = document.getElementById('m-grid'); g.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                let c = document.createElement('div'); c.className = 'cell';
-                c.onclick = () => { c.innerText = "💎"; c.style.background = "#34c759"; };
-                g.appendChild(c);
+                document.getElementById('r-btn').innerText = "СТАВКА";
             }
         }
     </script>
