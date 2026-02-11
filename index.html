@@ -11,7 +11,6 @@
         .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; }
         .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
 
-        /* ЕКРАНИ */
         .screen { display: none; height: 100vh; overflow-y: auto; padding: 15px; box-sizing: border-box; }
         .screen.active { display: block; }
 
@@ -27,19 +26,30 @@
 
         /* ГРА РАКЕТА */
         .back-btn { background: #222; border: none; color: #aaa; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; }
-        .history { display: flex; gap: 8px; padding-bottom: 10px; overflow-x: auto; }
+        .history { display: flex; gap: 8px; padding-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
         .hs-item { background: #1a1a1a; padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #888; border: 1px solid #333; }
         
-        .viewport { height: 240px; background: #000; border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #222; }
-        #rocket-v { width: 150px; position: absolute; bottom: -180px; transition: 0.4s; z-index: 1; }
-        .mult { font-size: 55px; font-weight: 900; z-index: 10; text-shadow: 0 0 15px rgba(0,0,0,0.7); }
+        .viewport { height: 240px; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border-radius: 20px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #222; }
+        
+        /* Стиль для відео: додано примусове відображення */
+        #rocket-v { 
+            width: 180px; 
+            position: absolute; 
+            bottom: -200px; 
+            transition: transform 0.5s ease-out, opacity 0.3s; 
+            z-index: 2; 
+            pointer-events: none;
+        }
+
+        .mult { font-size: 55px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(0,0,0,0.9); position: relative; }
 
         .controls { background: var(--card); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid #333; }
-        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; }
-        .main-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+        .main-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; transition: 0.2s; }
+        .main-btn:active { transform: scale(0.98); }
 
         .lobby-list { margin-top: 15px; height: 100px; overflow-y: auto; }
-        .bet-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #111; font-size: 13px; color: #555; }
+        .bet-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
@@ -66,34 +76,35 @@
             </div>
             <div class="game-card" style="opacity: 0.5;">
                 <div class="game-img">💎</div>
-                <div class="game-name">Mines</div>
+                <div class="game-name">Mines (Скоро)</div>
             </div>
         </div>
     </div>
 
     <div id="rocket-game" class="screen">
-        <button class="back-btn" onclick="go('lobby')">← Вийти в лобі</button>
+        <button class="back-btn" onclick="go('lobby')">← До вибору ігор</button>
         
         <div class="history" id="hs-list">
             <div class="hs-item">1.25x</div>
-            <div class="hs-item">3.10x</div>
+            <div class="hs-item" style="color:#cc42ff">12.40x</div>
         </div>
 
         <div class="viewport">
-            <div id="status" style="position:absolute; top:20px; font-size:12px; color:var(--blue); font-weight:bold; z-index:10;">ЧЕКАЄМО СТАВКИ</div>
+            <div id="status" style="position:absolute; top:15px; font-size:11px; color:var(--blue); font-weight:bold; z-index:11; letter-spacing:1px;">ЧЕКАЄМО СТАВКИ</div>
             <div id="mult" class="mult">5.0s</div>
-            <video id="rocket-v" playsinline muted loop>
+            
+            <video id="rocket-v" playsinline muted loop preload="auto">
                 <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
             </video>
         </div>
 
         <div class="controls">
-            <input type="number" id="bet-amt" value="100">
+            <input type="number" id="bet-amt" value="100" min="10">
             <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
             
             <div class="lobby-list">
-                <div class="bet-row"><span>👤 @alex_shark</span><span>250 ₴</span></div>
-                <div class="bet-row"><span>👤 @kristi_win</span><span>100 ₴</span></div>
+                <div class="bet-row"><span>👤 @vlad_pro</span><span>200 ₴</span></div>
+                <div class="bet-row"><span>👤 @anna_win</span><span>50 ₴</span></div>
             </div>
         </div>
     </div>
@@ -108,6 +119,8 @@
         function go(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            // Примусово завантажуємо відео при вході в гру
+            if(id === 'rocket-game') document.getElementById('rocket-v').load();
         }
 
         function updateBal() {
@@ -119,17 +132,20 @@
             timer = 5.0;
             myBet = 0;
             
-            document.getElementById('status').innerText = "ЧЕКАЄМО СТАВКИ";
+            document.getElementById('status').innerText = "ПРИЙОМ СТАВОК";
             document.getElementById('status').style.color = "var(--blue)";
+            document.getElementById('mult').innerText = "5.0s";
             document.getElementById('mult').style.color = "white";
             
             const v = document.getElementById('rocket-v');
             v.pause();
-            v.style.bottom = "-180px";
+            v.currentTime = 0;
+            v.style.transform = "translateY(200px)"; // Ховаємо вниз
             v.style.opacity = "1";
 
             document.getElementById('action-btn').innerText = "СТАВКА";
             document.getElementById('action-btn').style.background = "var(--blue)";
+            document.getElementById('action-btn').style.color = "white";
 
             let t = setInterval(() => {
                 timer -= 0.1;
@@ -144,14 +160,14 @@
         function launch() {
             mode = "FLY";
             currentMult = 1.00;
-            document.getElementById('status').innerText = "ПОЛІТ РАКЕТИ";
+            document.getElementById('status').innerText = "РАКЕТА ЛЕТИТЬ";
             document.getElementById('status').style.color = "var(--green)";
             
             const v = document.getElementById('rocket-v');
-            v.play();
-            v.style.bottom = "20px";
+            v.play().catch(e => console.log("Video play failed:", e));
+            v.style.transform = "translateY(-150px)"; // Виліт вгору
 
-            let crashPoint = (1.1 + Math.random() * 3 + (Math.random() > 0.8 ? 5 : 0)).toFixed(2);
+            let crashPoint = (1.1 + Math.random() * 2.5 + (Math.random() > 0.8 ? 5 : 0)).toFixed(2);
 
             let fly = setInterval(() => {
                 currentMult += 0.01;
@@ -172,7 +188,7 @@
             document.getElementById('mult').style.color = "var(--red)";
             
             const v = document.getElementById('rocket-v');
-            v.style.opacity = "0";
+            v.style.opacity = "0"; // Плавне зникнення при вибуху
 
             if(myBet > 0) {
                 document.getElementById('action-btn').innerText = "ПРОГРАШ";
@@ -182,6 +198,7 @@
             const hs = document.getElementById('hs-list');
             const item = document.createElement('div');
             item.className = "hs-item";
+            if(cp > 5) item.style.color = "#cc42ff";
             item.innerText = cp + "x";
             hs.prepend(item);
 
@@ -193,10 +210,10 @@
             const amt = parseFloat(document.getElementById('bet-amt').value);
 
             if(mode === "WAIT" && myBet === 0) {
-                if(amt > balance) return;
+                if(amt > balance || amt < 10) return;
                 balance -= amt; myBet = amt;
                 updateBal();
-                btn.innerText = "СТАВКА ПРИЙНЯТА";
+                btn.innerText = "ОЧІКУВАННЯ...";
                 btn.style.background = "#333";
             } else if(mode === "FLY" && myBet > 0) {
                 let win = myBet * currentMult;
@@ -204,10 +221,12 @@
                 updateBal();
                 btn.innerText = "ЗАБРАНО: " + win.toFixed(2);
                 btn.style.background = "var(--green)";
+                btn.style.color = "black";
             }
         }
 
-        startCycle();
+        // Запуск при завантаженні
+        window.onload = startCycle;
     </script>
 </body>
 </html>
