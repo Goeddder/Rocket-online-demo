@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Galaxy Pro 🚀</title>
+    <title>Giftup Galaxy Fixed 🚀</title>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #141416; }
-        
-        body { 
-            background: #000; color: white; font-family: -apple-system, sans-serif; 
-            margin: 0; padding: 0; overflow: hidden; height: 100vh;
-        }
+        body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
 
-        /* Зірки на фоні */
-        .stars {
-            position: absolute; width: 100%; height: 100%;
-            background: radial-gradient(1px 1px at 25% 35%, #fff, transparent),
-                        radial-gradient(1px 1px at 50% 50%, #fff, transparent),
-                        radial-gradient(1px 1px at 75% 75%, #fff, transparent);
-            background-size: 250px 250px; opacity: 0.3; z-index: 0;
-        }
+        /* Зірки */
+        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 60%, #fff, transparent); background-size: 300px 300px; opacity: 0.2; z-index: 0; }
 
-        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; position: relative; z-index: 10; }
+        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; position: relative; z-index: 10; height: 50px; box-sizing: border-box; }
         .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
         .screen { display: none; height: calc(100vh - 50px); flex-direction: column; position: relative; z-index: 5; }
@@ -39,33 +29,24 @@
         .hs-item { background: #111; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #555; border: 1px solid #222; }
         .active-tab { background: rgba(0, 122, 255, 0.1); color: var(--blue); border-color: var(--blue); min-width: 50px; text-align: center; }
 
-        .back-btn { margin: 10px 15px; background: #111; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 8px; font-size: 11px; width: fit-content; }
+        .back-btn { margin: 10px 15px; background: #111; border: 1px solid #333; color: #888; padding: 8px 12px; border-radius: 8px; font-size: 11px; width: fit-content; z-index: 10; cursor: pointer; }
 
         .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        
-        /* РАКЕТА: mix-blend-mode прибирає синій фон відео */
-        #rocket-v { 
-            width: 240px; 
-            mix-blend-mode: screen; 
-            transform: scale(0); 
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            z-index: 1;
-        }
+        #rocket-v { width: 240px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.5s ease; z-index: 1; pointer-events: none; }
 
         .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; }
         input { width: 100%; background: #0a0a0a; border: 1px solid #222; padding: 12px; color: white; border-radius: 10px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; }
         .main-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
         .bets-menu { height: 110px; background: #0a0a0a; border-top: 1px solid #1a1a1a; }
-        .bets-title { padding: 6px 15px; font-size: 10px; color: #444; border-bottom: 1px solid #141416; font-weight: bold; text-transform: uppercase; }
+        .bets-title { padding: 6px 15px; font-size: 10px; color: #444; border-bottom: 1px solid #141416; font-weight: bold; }
         .bet-row { display: flex; justify-content: space-between; padding: 10px 15px; font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
-
     <div class="header">
-        <div style="font-weight: 900; letter-spacing: 1px;">GIFTUP</div>
+        <div style="font-weight: 900;">GIFTUP</div>
         <div class="balance"><span id="bal-val">500.00</span> ₴</div>
     </div>
 
@@ -90,22 +71,18 @@
                 <div id="live-tab" class="hs-item active-tab">5.0s</div>
             </div>
         </div>
-
         <button class="back-btn" onclick="openGame('lobby-screen')">← ВИЙТИ</button>
-
         <div class="game-viewport">
             <video id="rocket-v" playsinline muted loop>
                 <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
             </video>
         </div>
-
         <div class="controls">
             <input type="number" id="bet-amt" value="100">
             <button id="action-btn" class="main-btn" style="background: var(--blue);" onclick="doAction()">СТАВКА</button>
         </div>
-
         <div class="bets-menu">
-            <div class="bets-title">Ваша ставка</div>
+            <div class="bets-title">ВАША СТАВКА</div>
             <div id="my-bet-container"></div>
         </div>
     </div>
@@ -116,7 +93,7 @@
         let mode = "WAIT";
         let currentMult = 1.00;
         let timer = 5.0;
-        let gameInterval;
+        let gameLoop = null; // Один контрольний інтервал
 
         function updateBal() {
             document.getElementById('bal-val').innerText = balance.toFixed(2);
@@ -124,59 +101,82 @@
         }
 
         function openGame(id) {
+            // Очищуємо все при переході
+            clearInterval(gameLoop);
+            gameLoop = null;
+            
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'rocket-screen') startCycle();
-            else clearInterval(gameInterval);
+            
+            if(id === 'rocket-screen') {
+                resetRocket();
+                startCycle();
+            }
+        }
+
+        function resetRocket() {
+            const v = document.getElementById('rocket-v');
+            v.pause();
+            v.currentTime = 0;
+            v.style.transform = "scale(0)";
+            v.style.opacity = "1";
+            document.getElementById('my-bet-container').innerHTML = "";
+            document.getElementById('action-btn').innerText = "СТАВКА";
+            document.getElementById('action-btn').style.background = "var(--blue)";
         }
 
         function startCycle() {
-            clearInterval(gameInterval);
-            mode = "WAIT"; timer = 5.0; myBet = 0;
-            document.getElementById('my-bet-container').innerHTML = "";
-            
+            clearInterval(gameLoop);
+            mode = "WAIT";
+            timer = 5.0;
+            myBet = 0;
+
             const tab = document.getElementById('live-tab');
-            tab.innerText = "5.0s"; tab.style.color = "var(--blue)";
-            
-            const v = document.getElementById('rocket-v');
-            v.style.transform = "scale(0)"; v.style.opacity = "1"; v.pause(); v.currentTime = 0;
+            tab.style.color = "var(--blue)";
 
-            const btn = document.getElementById('action-btn');
-            btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; btn.style.color = "white";
-
-            gameInterval = setInterval(() => {
+            gameLoop = setInterval(() => {
                 timer -= 0.1;
                 tab.innerText = Math.max(0, timer).toFixed(1) + "s";
-                if(timer <= 0) { clearInterval(gameInterval); launch(); }
+                if(timer <= 0) {
+                    clearInterval(gameLoop);
+                    launch();
+                }
             }, 100);
         }
 
         function launch() {
-            mode = "FLY"; currentMult = 1.00;
+            clearInterval(gameLoop);
+            mode = "FLY";
+            currentMult = 1.00;
             const tab = document.getElementById('live-tab');
             tab.style.color = "var(--green)";
             
             const v = document.getElementById('rocket-v');
-            v.style.transform = "scale(1)"; v.play();
+            v.style.transform = "scale(1)";
+            v.play();
 
             let crashPoint = (1.05 + Math.random() * 3.5).toFixed(2);
-            
-            gameInterval = setInterval(() => {
+
+            gameLoop = setInterval(() => {
                 currentMult += 0.01;
-                let displayMult = currentMult.toFixed(2);
-                tab.innerText = displayMult + "x";
+                let val = currentMult.toFixed(2);
+                tab.innerText = val + "x";
                 
                 const liveStatus = document.getElementById('live-bet-status');
-                if(liveStatus) liveStatus.innerText = displayMult + "x";
+                if(liveStatus) liveStatus.innerText = val + "x";
 
-                if(currentMult >= crashPoint) { clearInterval(gameInterval); boom(crashPoint); }
+                if(currentMult >= crashPoint) {
+                    clearInterval(gameLoop);
+                    boom(crashPoint);
+                }
             }, 50);
         }
 
         function boom(cp) {
             mode = "CRASH";
             const tab = document.getElementById('live-tab');
-            tab.innerText = cp + "x"; tab.style.color = "var(--red)";
+            tab.innerText = cp + "x";
+            tab.style.color = "var(--red)";
             
             const v = document.getElementById('rocket-v');
             v.style.opacity = "0";
@@ -189,7 +189,8 @@
             }
 
             const item = document.createElement('div');
-            item.className = "hs-item"; item.innerText = cp + "x";
+            item.className = "hs-item";
+            item.innerText = cp + "x";
             const list = document.getElementById('hs-list');
             list.insertBefore(item, list.children[1]);
 
@@ -208,10 +209,12 @@
                         <span>💰 ${amt} ₴</span>
                         <span id="live-bet-status" style="color:var(--blue); font-weight:bold;">WAITING</span>
                     </div>`;
-                btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#222";
+                btn.innerText = "ПРИЙНЯТО";
+                btn.style.background = "#222";
             } else if(mode === "FLY" && myBet > 0) {
                 let win = myBet * currentMult;
-                balance += win; updateBal();
+                balance += win;
+                updateBal();
                 document.getElementById('my-bet-container').innerHTML = `
                     <div class="bet-row">
                         <span>💰 ${myBet} ₴</span>
@@ -219,7 +222,8 @@
                     </div>`;
                 myBet = 0;
                 btn.innerText = "WIN: " + win.toFixed(0);
-                btn.style.background = "var(--green)"; btn.style.color = "black";
+                btn.style.background = "var(--green)";
+                btn.style.color = "black";
             }
         }
         updateBal();
