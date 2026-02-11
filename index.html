@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Live Bets 🚀</title>
+    <title>Giftup Solo 🚀</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --card: #141416; }
@@ -22,12 +22,12 @@
         .avatar-img { width: 45px; height: 45px; border-radius: 50%; background: #222; object-fit: cover; }
         .game-card { background: var(--card); border-radius: 16px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; }
         
-        /* ЗОНА РАКЕТИ */
+        /* ГРА */
         .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
         #rocket-v { width: 260px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; position: relative; z-index: 5; }
 
-        /* ІСТОРІЯ (ГОРТАЄТЬСЯ) */
-        .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        /* ІСТОРІЯ ІКСІВ (ГОРТАЄТЬСЯ) */
+        .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
         .history-section::-webkit-scrollbar { display: none; }
         .hs-item { background: #000; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #555; min-width: 45px; text-align: center; }
         .active-tab { border-color: var(--blue); color: var(--blue); }
@@ -40,13 +40,10 @@
         .main-btn { width: 100%; padding: 18px; border-radius: 10px; border: none; font-size: 17px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
         /* СПИСОК СТАВОК (ГОРТАЄТЬСЯ) */
-        .bets-menu { flex-basis: 120px; flex-grow: 0; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 10px; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .bets-menu { height: 100px; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; }
+        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 8px; }
         .user-info { display: flex; align-items: center; gap: 8px; }
         .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #222; }
-        .win-amt { color: var(--green); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -94,17 +91,18 @@
         tg.expand();
 
         const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "000", photo_url: "" };
-        document.getElementById('user-name').innerText = user.username ? "@" + user.username : user.first_name;
+        const uName = user.username ? "@" + user.username : user.first_name;
+        const uPhoto = user.photo_url || `https://ui-avatars.com/api/?name=${uName}&background=222&color=fff`;
+
+        document.getElementById('user-name').innerText = uName;
         document.getElementById('user-id').innerText = `ID: ${user.id}`;
-        if(user.photo_url) document.getElementById('user-photo').src = user.photo_url;
+        document.getElementById('user-photo').src = uPhoto;
 
         let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500.00;
         let myBet = 0;
         let hasWon = false;
         let lastRoundId = -1;
         let history = JSON.parse(localStorage.getItem('rocket_history')) || [];
-
-        const fakeNames = ["Dima_🚀", "CryptoKing", "Anna.S", "RocketMan", "User_99", "RichBoy", "MoonLover", "Oleg_T"];
 
         function updateBal() {
             document.getElementById('bal-val').innerText = balance.toFixed(2);
@@ -135,42 +133,23 @@
             });
         }
 
-        function addFakeBet() {
-            const list = document.getElementById('bet-list');
-            const name = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-            const amt = (Math.random() * 500 + 50).toFixed(0);
-            const row = document.createElement('div');
-            row.className = 'bet-row';
-            row.innerHTML = `
-                <div class="user-info">
-                    <img src="https://ui-avatars.com/api/?name=${name}&background=random&color=fff" class="mini-avatar">
-                    <span>${name}</span>
-                </div>
-                <span class="bet-amt">${amt} ₴</span>
-            `;
-            list.prepend(row);
-        }
-
         function doAction() {
             const ms = Date.now() % 20000;
             const btn = document.getElementById('action-btn');
             const amt = parseFloat(document.getElementById('bet-amt').value);
 
             if (ms < 6000 && myBet === 0) {
-                if (amt > balance) return;
+                if (amt > balance || amt <= 0) return;
                 balance -= amt; myBet = amt; hasWon = false;
                 updateBal();
-                const row = document.createElement('div');
-                row.className = 'bet-row';
-                row.id = 'my-bet-row';
-                row.innerHTML = `
-                    <div class="user-info">
-                        <img src="${document.getElementById('user-photo').src}" class="mini-avatar">
-                        <span style="color:var(--blue)">Ви</span>
-                    </div>
-                    <span id="live-x" style="font-weight:bold;">${amt} ₴</span>
-                `;
-                document.getElementById('bet-list').prepend(row);
+                document.getElementById('bet-list').innerHTML = `
+                    <div class="bet-row">
+                        <div class="user-info">
+                            <img src="${uPhoto}" class="mini-avatar">
+                            <span>${uName}</span>
+                        </div>
+                        <span id="live-x" style="font-weight:bold;">${amt} ₴</span>
+                    </div>`;
                 btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#111";
             } 
             else if (ms >= 6000 && myBet > 0 && !hasWon) {
@@ -181,8 +160,8 @@
                     updateBal();
                     btn.innerText = `+${win.toFixed(0)} ₴`; btn.style.background = "var(--green)";
                     btn.style.color = "#000";
-                    const myRow = document.getElementById('my-bet-row');
-                    if(myRow) myRow.querySelector('#live-x').innerHTML = `<span class="win-amt">+${win.toFixed(0)}</span>`;
+                    const liveX = document.getElementById('live-x');
+                    if(liveX) liveX.innerHTML = `<span style="color:var(--green)">+${win.toFixed(0)} ₴</span>`;
                 }
             }
         }
@@ -207,9 +186,6 @@
                 document.getElementById('bet-list').innerHTML = "";
             }
 
-            // Додаємо фейкові ставки під час очікування
-            if (ms > 1000 && ms < 5500 && Math.random() > 0.9) addFakeBet();
-
             const cX = getCrash(rId);
             const cMs = (cX - 1) / 0.15 * 1000;
 
@@ -231,7 +207,12 @@
             } else {
                 tab.innerText = cX.toFixed(2) + "x"; tab.style.color = "var(--red)";
                 rocket.style.transform = "scale(0)";
-                if(myBet > 0 && !hasWon) { btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; btn.style.color="white"; myBet = 0; }
+                if(myBet > 0 && !hasWon) { 
+                    btn.innerText = "BOOM!"; btn.style.background = "var(--red)"; btn.style.color="white";
+                    const liveX = document.getElementById('live-x');
+                    if(liveX) liveX.innerHTML = `<span style="color:var(--red)">CRASH</span>`;
+                    myBet = 0; 
+                }
             }
         }
 
