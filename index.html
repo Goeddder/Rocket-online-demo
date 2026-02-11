@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Giftup Pure Black 🚀</title>
+    <title>Giftup Clean Black 🚀</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --blue: #007aff; --cyan: #00f2ff; --green: #34c759; --red: #ff3b30; --card: #141416; }
+        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --card: #141416; }
         body { background: #000; color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        /* КОСМІЧНИЙ ДЕКОР ТІЛЬКИ НА ФОНІ */
-        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1.5px 1.5px at 70% 70%, #fff, transparent); background-size: 300px 300px; opacity: 0.15; pointer-events: none; z-index: 1; }
+        /* Тільки легкі статичні зірки на фоні лоббі */
+        .stars { position: absolute; width: 100%; height: 100%; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 70%, #fff, transparent); background-size: 300px 300px; opacity: 0.1; pointer-events: none; }
 
         .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1a1a1a; background: #000; height: 50px; position: relative; z-index: 100; box-sizing: border-box; }
         .balance { background: var(--green); color: #000; padding: 5px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
@@ -19,33 +19,29 @@
         .screen.active { display: flex; }
 
         /* ЛОББІ */
-        .profile-card { background: var(--card); border-radius: 15px; padding: 15px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; margin: 20px; position: relative; z-index: 10; }
-        .avatar-img { width: 45px; height: 45px; border-radius: 50%; background: var(--blue); object-fit: cover; border: 2px solid #333; }
-        .game-card { background: var(--card); border-radius: 20px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; position: relative; z-index: 10; }
+        .profile-card { background: var(--card); border-radius: 12px; padding: 15px; border: 1px solid #222; display: flex; align-items: center; gap: 12px; margin: 20px; }
+        .avatar-img { width: 45px; height: 45px; border-radius: 50%; background: #222; object-fit: cover; }
+        .game-card { background: var(--card); border-radius: 16px; padding: 30px; border: 1px solid #222; text-align: center; cursor: pointer; margin: 0 20px; }
         
-        /* ЗОНА РАКЕТИ — ЧИСТИЙ ЧОРНИЙ */
-        .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000 !important; }
-        
-        /* МІНІ-ДЕКОР */
-        .cosmo-ring { position: absolute; width: 220px; height: 60px; border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 50%; transform: rotate(-15deg); pointer-events: none; }
-
-        #rocket-v { width: 260px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3)); position: relative; z-index: 5; }
+        /* ЗОНА РАКЕТИ — ПОВНИЙ НУЛЬ ПІДСВІТКИ */
+        .game-viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
+        #rocket-v { width: 260px; mix-blend-mode: screen; transform: scale(0); transition: transform 0.4s ease; position: relative; z-index: 5; }
 
         .history-section { padding: 8px 10px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-        .hs-item { background: #111; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #666; min-width: 45px; text-align: center; }
+        .hs-item { background: #000; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; border: 1px solid #222; color: #555; min-width: 45px; text-align: center; }
         .active-tab { border-color: var(--blue); color: var(--blue); }
-        .past-item { color: #aaa; border-color: #333; }
+        .past-item { color: #888; border-color: #222; }
 
-        .back-btn { margin: 10px 15px; background: #111; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 8px; font-size: 11px; width: fit-content; cursor: pointer; border: none; }
+        .back-btn { margin: 10px 15px; background: transparent; border: 1px solid #222; color: #555; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; }
 
-        .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; z-index: 10; }
-        input { width: 100%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: white; border-radius: 10px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
-        .main-btn { width: 100%; padding: 18px; border-radius: 14px; border: none; font-size: 17px; font-weight: 900; color: white; cursor: pointer; text-transform: uppercase; }
+        .controls { padding: 15px; background: #000; border-top: 1px solid #1a1a1a; }
+        input { width: 100%; background: #000; border: 1px solid #222; padding: 12px; color: white; border-radius: 8px; font-size: 16px; text-align: center; margin-bottom: 10px; outline: none; box-sizing: border-box; }
+        .main-btn { width: 100%; padding: 18px; border-radius: 10px; border: none; font-size: 17px; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; }
 
-        .bets-menu { height: 80px; background: #0a0a0a; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; }
+        .bets-menu { height: 80px; background: #000; border-top: 1px solid #1a1a1a; padding: 10px 15px; overflow-y: auto; }
         .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         .user-info { display: flex; align-items: center; gap: 8px; }
-        .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+        .mini-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: #222; }
     </style>
 </head>
 <body>
@@ -57,16 +53,16 @@
 
     <div id="lobby-screen" class="screen active">
         <div class="profile-card">
-            <img id="user-photo" src="" class="avatar-img" alt="👤" onerror="this.src='https://ui-avatars.com/api/?name=User&background=007aff&color=fff'">
+            <img id="user-photo" src="" class="avatar-img" alt="👤" onerror="this.src='https://ui-avatars.com/api/?name=User&background=222&color=fff'">
             <div>
                 <div id="user-name" style="font-weight: bold; font-size: 15px;">Завантаження...</div>
-                <div id="user-id" style="font-size: 10px; color: #555;">ID: 00000000 • VERIFIED</div>
+                <div id="user-id" style="font-size: 10px; color: #444;">ID: 00000000</div>
             </div>
         </div>
         <div class="game-card" onclick="openGame()">
-            <div style="font-size: 45px;">🚀</div>
-            <h3>ROCKET ONLINE</h3>
-            <div style="color:var(--green); font-size:12px; font-weight:bold;">• LIVE NOW</div>
+            <div style="font-size: 45px; margin-bottom: 10px;">🚀</div>
+            <h3 style="margin:0">ROCKET ONLINE</h3>
+            <div style="color:var(--green); font-size:11px; margin-top:5px;">• LIVE</div>
         </div>
     </div>
 
@@ -76,7 +72,6 @@
         </div>
         <button class="back-btn" onclick="closeGame()">← ВИЙТИ</button>
         <div class="game-viewport">
-            <div class="cosmo-ring"></div>
             <video id="rocket-v" playsinline muted loop>
                 <source src="https://files.catbox.moe/d13y9l.mp4" type="video/mp4">
             </video>
@@ -92,9 +87,9 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "777", photo_url: "" };
+        const user = tg.initDataUnsafe?.user || { first_name: "Гравець", id: "000", photo_url: "" };
         document.getElementById('user-name').innerText = user.username ? "@" + user.username : user.first_name;
-        document.getElementById('user-id').innerText = `ID: ${user.id} • VERIFIED`;
+        document.getElementById('user-id').innerText = `ID: ${user.id}`;
         if(user.photo_url) document.getElementById('user-photo').src = user.photo_url;
 
         let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500.00;
@@ -147,9 +142,9 @@
                             <img src="${document.getElementById('user-photo').src}" class="mini-avatar">
                             <span>${document.getElementById('user-name').innerText}</span>
                         </div>
-                        <span id="live-x" style="color:var(--cyan); font-weight:bold;">У ГРІ</span>
+                        <span id="live-x" style="font-weight:bold; color:#fff">У ГРІ</span>
                     </div>`;
-                btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#222";
+                btn.innerText = "ПРИЙНЯТО"; btn.style.background = "#111";
             } 
             else if (ms >= 6000 && myBet > 0 && !hasWon) {
                 const curX = 1 + ((ms - 6000) / 1000) * 0.15;
@@ -209,7 +204,6 @@
 
         setInterval(main, 50);
         updateBal();
-        renderHistory();
     </script>
 </body>
 </html>
