@@ -7,145 +7,148 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --panel: #1c1c1e; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 50px; }
         
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; }
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; position: sticky; top: 0; background: #000; z-index: 100; }
+        .balance { background: var(--green); color: black; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; }
 
-        .viewport { height: 300px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #rocket-vid { width: 220px; position: absolute; bottom: -250px; transition: transform 0.4s, opacity 0.3s; }
+        .tabs { display: flex; gap: 10px; padding: 15px; }
+        .tab { flex: 1; padding: 12px; background: #1c1c1e; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 1px solid #333; }
+        .tab.active { background: #333; border-color: var(--blue); }
+
+        .game-container { display: none; padding: 10px; }
+        .game-container.active { display: block; }
+
+        /* Rocket UI */
+        .viewport { height: 250px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #050505; border-radius: 15px; margin-bottom: 15px; }
+        #rocket-vid { width: 180px; position: absolute; bottom: -200px; transition: transform 0.4s, opacity 0.3s; }
+        .mult { font-size: 42px; font-weight: 900; z-index: 10; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+
+        /* Mines UI */
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
+        .cell { aspect-ratio: 1; background: #2c2c2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: 0.2s; }
+        .cell.open { background: #3a3a3c; }
+
+        .controls { background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; }
+        input { width: 100%; background: #1c1c1e; border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; font-size: 18px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
         
-        .game-ui { padding: 20px; background: #111; border-top: 1px solid #222; border-radius: 20px 20px 0 0; }
-        .mult { font-size: 48px; font-weight: 900; text-align: center; margin-bottom: 20px; color: white; }
-        
-        input { width: 100%; background: #1c1c1e; border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; font-size: 18px; box-sizing: border-box; margin-bottom: 10px; outline: none; }
-        .btn { width: 100%; padding: 20px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; transition: 0.2s; }
-        
-        .history { padding: 15px; max-height: 200px; overflow-y: auto; }
-        .bet-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #111; font-size: 14px; }
-        .shake { animation: shake 0.3s; }
-        @keyframes shake { 0%, 100% {transform: translate(0);} 25% {transform: translate(5px);} 75% {transform: translate(-5px);} }
+        .history-title { font-size: 12px; color: #555; margin: 15px 0 10px; padding-left: 5px; }
+        .bet-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #111; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <span>@tg_player</span>
-        <div class="balance"><span id="user-balance">500.00</span> ₴</div>
+        <div class="balance"><span class="bal-txt">500.00</span> ₴</div>
     </div>
 
-    <div id="v-port" class="viewport">
-        <video id="rocket-vid" playsinline muted loop>
-            <source src="https://files.catbox.moe/d13y9l.mp4">
-        </video>
+    <div class="tabs">
+        <div class="tab active" onclick="switchGame('rocket')">ROCKET</div>
+        <div class="tab" onclick="switchGame('mines')">MINES</div>
     </div>
 
-    <div class="game-ui">
-        <div id="main-mult" class="mult">5.00s</div>
-        <input type="number" id="bet-input" value="100">
-        <button id="action-btn" class="btn" style="background:var(--blue)" onclick="makeBet()">СТАВКА</button>
+    <div id="rocket-game" class="game-container active">
+        <div class="viewport">
+            <div id="r-mult" class="mult">5.00s</div>
+            <video id="rocket-vid" playsinline muted loop>
+                <source src="https://files.catbox.moe/d13y9l.mp4">
+            </video>
+        </div>
+        <div class="controls">
+            <input type="number" id="r-input" value="100">
+            <button id="r-btn" class="btn" style="background:var(--blue)" onclick="rocketAction()">СТАВКА</button>
+        </div>
+        <div class="history-title">ОНЛАЙН СТАВКИ:</div>
+        <div id="r-history"></div>
     </div>
 
-    <div class="history" id="bet-list">
-        <div style="color:#555; font-size:12px; margin-bottom:10px;">ЖИВІ СТАВКИ:</div>
-        <div id="bets-container"></div>
+    <div id="mines-game" class="game-container">
+        <div class="grid" id="m-grid"></div>
+        <div class="controls">
+            <input type="number" id="m-input" value="100">
+            <button id="m-btn" class="btn" style="background:var(--blue)" onclick="minesStart()">ПОЧАТИ ГРУ</button>
+        </div>
     </div>
 
     <script>
-        // ПІДКЛЮЧЕННЯ ДО ТВОГО СЕРВЕРА
         const socket = io('https://rocket-online-demo.onrender.com');
-
         let balance = parseFloat(localStorage.getItem('giftup_bal')) || 500;
-        let myCurrentBet = 0;
-        let isWaiting = false;
+        let myBet = 0;
+        let currentStatus = "WAIT";
 
-        function updateBalanceDisplay() {
-            document.getElementById('user-balance').innerText = balance.toFixed(2);
+        function updateBal() {
+            document.querySelectorAll('.bal-txt').forEach(el => el.innerText = balance.toFixed(2));
             localStorage.setItem('giftup_bal', balance);
         }
-        updateBalanceDisplay();
+        updateBal();
 
-        // СЛУХАЄМО СЕРВЕР
+        function switchGame(game) {
+            document.querySelectorAll('.game-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(game + '-game').classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // --- ROCKET LOGIC ---
         socket.on('gameTick', (data) => {
-            const multText = document.getElementById('main-mult');
-            const rocket = document.getElementById('rocket-vid');
-            const btn = document.getElementById('action-btn');
+            currentStatus = data.gameState;
+            const multEl = document.getElementById('r-mult');
+            const video = document.getElementById('rocket-vid');
+            const btn = document.getElementById('r-btn');
 
             if (data.gameState === "WAIT") {
-                multText.innerText = data.timer + ".00s";
-                multText.style.color = "white";
-                rocket.style.transform = "translateY(0)";
-                rocket.style.opacity = "1";
-                document.getElementById('v-port').style.background = "transparent";
-                
-                if (myCurrentBet === 0 && !isWaiting) {
-                    btn.innerText = "СТАВКА";
-                    btn.style.background = "var(--blue)";
-                }
-            } 
-            else if (data.gameState === "FLY") {
-                multText.innerText = data.multiplier + "x";
-                rocket.play();
-                rocket.style.transform = "translateY(-350px)";
-                
-                if (myCurrentBet > 0) {
-                    btn.innerText = "ЗАБРАТИ " + (myCurrentBet * data.multiplier).toFixed(2);
+                multEl.innerText = data.timer + ".00s";
+                multEl.style.color = "white";
+                video.style.transform = "translateY(0)";
+                video.style.opacity = "1";
+                if (myBet === 0) { btn.innerText = "СТАВКА"; btn.style.background = "var(--blue)"; }
+            } else if (data.gameState === "FLY") {
+                multEl.innerText = data.multiplier + "x";
+                video.play();
+                video.style.transform = "translateY(-300px)";
+                if (myBet > 0) {
+                    btn.innerText = "ЗАБРАТИ " + (myBet * data.multiplier).toFixed(2);
                     btn.style.background = "var(--green)";
                 }
-            } 
-            else if (data.gameState === "CRASH") {
-                multText.innerText = "BOOM " + data.multiplier + "x";
-                multText.style.color = var(--red);
-                rocket.style.opacity = "0";
-                rocket.pause();
-                document.getElementById('v-port').classList.add('shake');
-                setTimeout(() => document.getElementById('v-port').classList.remove('shake'), 400);
-                
-                myCurrentBet = 0;
-                isWaiting = false;
+            } else if (data.gameState === "CRASH") {
+                multEl.innerText = "BOOM " + data.multiplier + "x";
+                multEl.style.color = "var(--red)";
+                video.style.opacity = "0";
+                myBet = 0;
             }
 
-            // Оновлюємо список усіх гравців (код сервера має надсилати масив bets)
             if (data.bets) {
-                const container = document.getElementById('bets-container');
-                container.innerHTML = data.bets.map(b => `
-                    <div class="bet-item">
-                        <span>${b.user}</span>
-                        <span style="color:var(--green)">${b.amount} ₴</span>
-                    </div>
+                document.getElementById('r-history').innerHTML = data.bets.map(b => `
+                    <div class="bet-item"><span>${b.user}</span><span style="color:var(--green)">${b.amount} ₴</span></div>
                 `).join('');
             }
         });
 
-        function makeBet() {
-            const amt = parseFloat(document.getElementById('bet-input').value);
-            const btn = document.getElementById('action-btn');
-
-            // Якщо натиснули "СТАВКА"
-            if (myCurrentBet === 0 && amt <= balance && !isWaiting) {
-                balance -= amt;
-                myCurrentBet = amt;
-                isWaiting = true;
-                updateBalanceDisplay();
-                
+        function rocketAction() {
+            const amt = parseFloat(document.getElementById('r-input').value);
+            if (currentStatus === "WAIT" && myBet === 0 && amt <= balance) {
+                balance -= amt; myBet = amt; updateBal();
                 socket.emit('placeBet', { user: '@tg_player', amount: amt });
-                
-                btn.innerText = "ОЧІКУВАННЯ...";
-                btn.style.background = "#333";
-            } 
-            // Якщо натиснули "ЗАБРАТИ"
-            else if (myCurrentBet > 0) {
-                const currentMult = parseFloat(document.getElementById('main-mult').innerText);
-                const win = myCurrentBet * currentMult;
-                balance += win;
-                myCurrentBet = 0;
-                isWaiting = false;
-                updateBalanceDisplay();
-                
-                btn.innerText = "ВИГРАШ " + win.toFixed(2);
-                btn.style.background = "#555";
+                document.getElementById('r-btn').innerText = "ОЧІКУВАННЯ...";
+            } else if (myBet > 0 && currentStatus === "FLY") {
+                const m = parseFloat(document.getElementById('r-mult').innerText);
+                balance += myBet * m; myBet = 0; updateBal();
+                document.getElementById('r-btn').innerText = "СТАВКА";
+                document.getElementById('r-btn').style.background = "var(--blue)";
             }
         }
+
+        // --- MINES LOGIC (Simple Offline for now) ---
+        const grid = document.getElementById('m-grid');
+        for (let i = 0; i < 25; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.onclick = () => { if(cell.innerText === "") cell.innerText = "💎"; };
+            grid.appendChild(cell);
+        }
+        function minesStart() { alert("Міни готові! Став та шукай діаманти."); }
     </script>
 </body>
 </html>
