@@ -5,147 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Giftup Pro 🚀</title>
     <style>
-        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --card: #111; }
+        :root { --blue: #007aff; --green: #34c759; --red: #ff3b30; --bg: #000; --panel: #111; }
         body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; overflow: hidden; }
         
-        /* HEADER */
-        .header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .balance { background: var(--green); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .balance { background: var(--green); color: black; padding: 5px 15px; border-radius: 20px; font-weight: 800; }
 
-        /* HISTORY */
-        .history { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #080808; border-bottom: 1px solid #111; }
-        .hs-item { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; background: #1a1a1a; color: #aaa; }
-        .hs-item.high { color: #cc42ff; }
+        .history { display: flex; gap: 8px; padding: 12px; overflow-x: auto; background: #080808; border-bottom: 1px solid #1a1a1a; }
+        .hs-item { padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: bold; background: #1a1a1a; color: #888; }
 
-        /* GAME AREA */
-        .game-zone { height: 250px; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .stars { position: absolute; width: 200%; height: 200%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.3; }
-        .rocket { width: 120px; z-index: 5; transition: 0.3s; position: absolute; bottom: 20px; left: 20px; }
-        .mult-display { font-size: 60px; font-weight: 900; z-index: 10; text-shadow: 0 0 15px rgba(0,0,0,1); }
+        .game-area { height: 260px; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .multiplier { font-size: 65px; font-weight: 900; z-index: 10; }
+        .timer-label { font-size: 20px; color: var(--blue); margin-bottom: 10px; font-weight: bold; }
+        .rocket { width: 130px; position: absolute; bottom: 20px; left: 20px; z-index: 5; }
 
-        /* PANEL */
-        .pnl { padding: 15px; background: #0a0a0a; border-radius: 25px 25px 0 0; border-top: 1px solid #222; }
-        input { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: white; border-radius: 12px; font-size: 18px; box-sizing: border-box; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 18px; font-weight: 800; color: white; cursor: pointer; }
+        .controls { padding: 20px; background: var(--panel); border-radius: 24px 24px 0 0; border-top: 1px solid #222; }
+        input { width: 100%; background: #000; border: 1px solid #333; padding: 18px; color: white; border-radius: 14px; font-size: 20px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        .bet-btn { width: 100%; padding: 20px; border-radius: 16px; border: none; font-size: 20px; font-weight: 800; color: white; cursor: pointer; }
 
-        /* LOBBY TABLE */
-        .lobby { margin-top: 15px; height: 150px; overflow-y: auto; font-size: 13px; }
-        .bet-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #111; color: #888; }
-        .win { color: var(--green); font-weight: bold; }
+        .lobby { margin-top: 20px; height: 150px; overflow-y: auto; }
+        .bet-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1a1a1a; font-size: 14px; color: #666; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <span style="font-weight:900">GIFTUP</span>
+        <span style="font-weight: 900;">GIFTUP</span>
         <div class="balance"><span id="bal">500.00</span> ₴</div>
     </div>
 
-    <div class="history" id="hs">
-        <div class="hs-item">1.45x</div>
-        <div class="hs-item high">12.03x</div>
-        <div class="hs-item">2.10x</div>
+    <div class="history" id="history"></div>
+
+    <div class="game-area">
+        <div style="text-align: center; z-index: 10;">
+            <div id="status-text" class="timer-label">До початку:</div>
+            <div id="mult" class="multiplier">5.0s</div>
+        </div>
+        <img id="rocket" class="rocket" src="https://files.catbox.moe/6v30h0.png" style="display:none;">
     </div>
 
-    <div class="game-zone">
-        <div class="stars" id="stars"></div>
-        <div id="m-val" class="mult-display">Очікування...</div>
-        <img id="rocket" class="rocket" src="https://files.catbox.moe/6v30h0.png" style="display:none">
-    </div>
-
-    <div class="pnl">
-        <input type="number" id="amt" value="100">
-        <button id="btn" class="btn" style="background:var(--blue)" onclick="handleBet()">СТАВКА</button>
+    <div class="controls">
+        <input type="number" id="bet-amount" value="100">
+        <button id="action-btn" class="bet-btn" style="background: var(--blue);" onclick="handleAction()">СТАВКА</button>
         
-        <div style="margin-top:15px; font-size:12px; color:#444">ЖИВІ СТАВКИ:</div>
-        <div class="lobby" id="lobby">
-            <div class="bet-row"><span>👤 @player1</span><span>100 ₴</span></div>
-            <div class="bet-row"><span>👤 @lucky_man</span><span>500 ₴</span></div>
+        <div class="lobby">
+            <div style="font-size: 11px; color: #444; margin-bottom: 5px;">СТАВКИ ГРАВЦІВ:</div>
+            <div id="lobby-list">
+                <div class="bet-row"><span>👤 @user_77</span><span>150 ₴</span></div>
+                <div class="bet-row"><span>👤 @pro_lucky</span><span>300 ₴</span></div>
+            </div>
         </div>
     </div>
 
     <script>
-        let balance = 500.00;
-        let currentBet = 0;
-        let isFlying = false;
-        let multiplier = 1.00;
+        let balance = 500.0;
+        let myBet = 0;
+        let gameStatus = "WAITING"; // WAITING, FLYING, CRASHED
+        let currentMult = 1.00;
+        let timerSeconds = 5;
         let gameLoop;
 
-        function updateBal() {
+        // Початковий цикл
+        startWaitingPhase();
+
+        function updateUI() {
             document.getElementById('bal').innerText = balance.toFixed(2);
         }
 
-        function handleBet() {
-            let btn = document.getElementById('btn');
-            let amt = parseFloat(document.getElementById('amt').value);
+        // Керування кнопкою
+        function handleAction() {
+            const btn = document.getElementById('action-btn');
+            const amt = parseFloat(document.getElementById('bet-amount').value);
 
-            if (!isFlying && currentBet === 0) {
-                // Ставка
-                if (amt > balance) return alert("Немає грошей!");
+            if (gameStatus === "WAITING" && myBet === 0) {
+                if (amt > balance) return;
                 balance -= amt;
-                currentBet = amt;
-                btn.innerText = "ОЧІКУВАННЯ...";
-                btn.style.background = "#333";
-                updateBal();
-                startRound();
-            } else if (isFlying && currentBet > 0) {
-                // Забрати
-                let win = currentBet * multiplier;
+                myBet = amt;
+                updateUI();
+                btn.innerText = "СТАВКА ПРИЙНЯТА";
+                btn.style.background = "#222";
+            } else if (gameStatus === "FLYING" && myBet > 0) {
+                let win = myBet * currentMult;
                 balance += win;
-                btn.innerText = "ВИГРАШ: " + win.toFixed(2);
-                btn.style.background = var(--green);
-                currentBet = 0;
-                updateBal();
+                myBet = 0;
+                updateUI();
+                btn.innerText = "ЗАБРАНО: " + win.toFixed(2);
+                btn.style.background = "var(--green)";
             }
         }
 
-        function startRound() {
-            if (isFlying) return;
-            let mDisplay = document.getElementById('m-val');
-            let rocket = document.getElementById('rocket');
-            let stars = document.getElementById('stars');
+        // Фаза 1: Очікування (5 секунд)
+        function startWaitingPhase() {
+            gameStatus = "WAITING";
+            timerSeconds = 5;
+            myBet = 0;
+            currentMult = 1.00;
+
+            document.getElementById('status-text').innerText = "До початку:";
+            document.getElementById('status-text').style.color = "var(--blue)";
+            document.getElementById('mult').innerText = timerSeconds.toFixed(1) + "s";
+            document.getElementById('mult').style.color = "white";
+            document.getElementById('rocket').style.display = "none";
             
-            multiplier = 1.00;
-            isFlying = true;
+            const btn = document.getElementById('action-btn');
+            btn.innerText = "СТАВКА";
+            btn.style.background = "var(--blue)";
+
+            let waitInterval = setInterval(() => {
+                timerSeconds -= 0.1;
+                document.getElementById('mult').innerText = Math.max(0, timerSeconds).toFixed(1) + "s";
+
+                if (timerSeconds <= 0) {
+                    clearInterval(waitInterval);
+                    startFlyingPhase();
+                }
+            }, 100);
+        }
+
+        // Фаза 2: Політ
+        function startFlyingPhase() {
+            gameStatus = "FLYING";
+            document.getElementById('status-text').innerText = "Множник:";
+            document.getElementById('status-text').style.color = "var(--green)";
+            const rocket = document.getElementById('rocket');
             rocket.style.display = "block";
             rocket.style.transform = "translate(0,0)";
 
-            let crashPoint = (Math.random() * 5 + 1).toFixed(2); // Рандомний виліт
+            let crashAt = (1 + Math.random() * 3 + (Math.random() > 0.7 ? 4 : 0)).toFixed(2);
 
             gameLoop = setInterval(() => {
-                multiplier += 0.01;
-                mDisplay.innerText = multiplier.toFixed(2) + "x";
+                currentMult += 0.01;
+                document.getElementById('mult').innerText = currentMult.toFixed(2) + "x";
                 
-                // Рух ракети та фону
-                rocket.style.transform = `translate(${multiplier * 10}px, -${multiplier * 15}px)`;
-                stars.style.top = (parseFloat(stars.style.top || 0) + 1) + "px";
+                // Рух ракети
+                let moveX = (currentMult - 1) * 35;
+                let moveY = (currentMult - 1) * 50;
+                rocket.style.transform = `translate(${moveX}px, -${moveY}px)`;
 
-                if (multiplier >= crashPoint) {
+                if (currentMult >= crashAt) {
                     clearInterval(gameLoop);
-                    endRound(crashPoint);
+                    startCrashPhase(crashAt);
                 }
             }, 50);
         }
 
-        function endRound(cp) {
-            isFlying = false;
-            currentBet = 0;
-            document.getElementById('m-val').innerText = "BOOM!";
-            document.getElementById('m-val').style.color = "var(--red)";
+        // Фаза 3: Вибух
+        function startCrashPhase(crashPoint) {
+            gameStatus = "CRASHED";
+            document.getElementById('status-text').innerText = "ВИБУХ!";
+            document.getElementById('status-text').style.color = "var(--red)";
+            document.getElementById('mult').innerText = crashPoint + "x";
+            document.getElementById('mult').style.color = "var(--red)";
             document.getElementById('rocket').style.display = "none";
-            
-            // Додаємо в історію
-            let hs = document.getElementById('hs');
-            let newItem = document.createElement('div');
-            newItem.className = `hs-item ${cp > 5 ? 'high' : ''}`;
-            newItem.innerText = cp + "x";
-            hs.prepend(newItem);
+
+            const btn = document.getElementById('action-btn');
+            if (myBet > 0) {
+                btn.innerText = "ПРОГРАШ";
+                btn.style.background = "var(--red)";
+            }
+
+            // Додати в історію
+            const hist = document.getElementById('history');
+            const item = document.createElement('div');
+            item.className = "hs-item";
+            item.innerText = crashPoint + "x";
+            hist.prepend(item);
 
             setTimeout(() => {
-                document.getElementById('m-val').style.color = "white";
-                document.getElementById('m-val').innerText = "1.00x";
-                document.getElementById('btn').innerText = "СТАВКА";
-                document.getElementById('btn').style.background = "var(--blue)";
+                startWaitingPhase();
             }, 3000);
         }
     </script>
